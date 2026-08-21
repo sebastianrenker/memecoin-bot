@@ -79,7 +79,7 @@ def _adjustment_loop(settings: Settings, db_path: str, combos: List[Combo],
 
 def serve(settings: Settings, combos: List[Combo], db_path: str,
           tick_interval_sec: float = 60.0, adjust_interval_sec: float = 1800.0,
-          max_ticks: Optional[int] = None) -> None:
+          max_ticks: Optional[int] = None, enable_adjust: bool = True) -> None:
     from data.factory import build_data_source
 
     db = Database(db_path)
@@ -92,10 +92,11 @@ def serve(settings: Settings, combos: List[Combo], db_path: str,
     trader.recover_state()
 
     stop = threading.Event()
-    adj = threading.Thread(target=_adjustment_loop,
-                           args=(settings, db_path, combos, stop, adjust_interval_sec),
-                           daemon=True)
-    adj.start()
+    if enable_adjust:
+        adj = threading.Thread(target=_adjustment_loop,
+                               args=(settings, db_path, combos, stop, adjust_interval_sec),
+                               daemon=True)
+        adj.start()
 
     ticks = 0
     try:

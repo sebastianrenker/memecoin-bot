@@ -251,7 +251,8 @@ def cmd_serve(args) -> int:
     print(f"Serving {len(combos)} combos, db={db_path}, tick={args.tick}s. Ctrl-C to stop.")
     try:
         serve(s, combos, db_path, tick_interval_sec=args.tick,
-              adjust_interval_sec=args.adjust, max_ticks=args.max_ticks)
+              adjust_interval_sec=args.adjust, max_ticks=args.max_ticks,
+              enable_adjust=not args.no_adjust)
     except AlreadyRunning as e:
         print(f"Not started: {e}")
         return 3
@@ -561,6 +562,8 @@ def build_parser() -> argparse.ArgumentParser:
     sv.add_argument("--tick", type=float, default=60.0)
     sv.add_argument("--adjust", type=float, default=1800.0)
     sv.add_argument("--max-ticks", type=int, default=None)
+    sv.add_argument("--no-adjust", action="store_true",
+                    help="skip the background re-evaluation thread (lighter; for live demos)")
     sv.set_defaults(func=cmd_serve)
 
     ci = sub.add_parser("ci-tick", help="one paper tick for CI/cloud")

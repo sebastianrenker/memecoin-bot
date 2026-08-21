@@ -302,6 +302,7 @@ def _pick_db_path() -> str:
     default (TRADING_DB) is honoured as the initial selection.
     """
     candidates = {
+        "Live paper (active demo, real 5m data)": os.path.join("cloud", "live.db"),
         "CEX paper (real ccxt data)": os.path.join("cloud", "paper.db"),
         "On-chain paper (real GeckoTerminal data)": os.path.join("cloud", "dex.db"),
     }
@@ -312,10 +313,20 @@ def _pick_db_path() -> str:
     default_idx = next((i for i, l in enumerate(labels) if candidates[l] == DB_PATH), 0)
     with st.sidebar:
         st.markdown("### Bot view")
-        st.caption("Both are paper (simulated money) on real market data.")
+        st.caption("All are paper (simulated money) on real market data.")
         choice = st.radio("Data source", labels, index=default_idx)
         path = candidates[choice]
         st.caption(f"DB: `{path}`" + ("" if os.path.exists(path) else "  · not created yet"))
+        st.markdown("### Live view")
+        auto = st.checkbox("Auto-refresh (like MockApe)", value=True)
+        secs = st.slider("Every N seconds", 5, 60, 15, disabled=not auto)
+        if auto:
+            try:
+                from streamlit.components.v1 import html
+                html(f"<script>setTimeout(function(){{window.parent.location.reload();}}, {secs*1000});</script>",
+                     height=0)
+            except Exception:
+                pass
     return path
 
 
