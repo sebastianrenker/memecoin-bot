@@ -37,6 +37,9 @@ jobs:
             echo "Keine Aenderung."
           else
             git commit -m "memecoin-scan: watchlist $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
-            git pull --rebase --autostash origin ${GITHUB_REF_NAME} || true
-            git push
+            for i in 1 2 3 4 5; do
+              git pull --rebase --autostash origin ${GITHUB_REF_NAME} || true
+              if git push; then echo "pushed"; break; fi
+              echo "push race, retry $i"; sleep 5
+            done
           fi
