@@ -295,14 +295,40 @@ def tab_audit(db: Database) -> None:
     st.dataframe(pd.DataFrame(db.recent_audit(300)), use_container_width=True)
 
 
+def _pick_db_path() -> str:
+    """Sidebar switch between the CEX paper bot and the on-chain paper bot.
+
+    Both trade SIMULATED money on REAL data (ccxt vs GeckoTerminal). The env
+    default (TRADING_DB) is honoured as the initial selection.
+    """
+    candidates = {
+        "CEX paper (real ccxt data)": os.path.join("cloud", "paper.db"),
+        "On-chain paper (real GeckoTerminal data)": os.path.join("cloud", "dex.db"),
+    }
+    # Include the env-configured DB if it's something else entirely.
+    if DB_PATH not in candidates.values():
+        candidates[f"Configured ({DB_PATH})"] = DB_PATH
+    labels = list(candidates)
+    default_idx = next((i for i, l in enumerate(labels) if candidates[l] == DB_PATH), 0)
+    with st.sidebar:
+        st.markdown("### Bot view")
+        st.caption("Both are paper (simulated money) on real market data.")
+        choice = st.radio("Data source", labels, index=default_idx)
+        path = candidates[choice]
+        st.caption(f"DB: `{path}`" + ("" if os.path.exists(path) else "  · not created yet"))
+    return path
+
+
 def main() -> None:
     st.set_page_config(page_title="Memecoin Paper Trader", layout="wide", page_icon="🎲")
     st.markdown(_CSS, unsafe_allow_html=True)
     st.title("🎲 Memecoin Paper-Trading Analysis")
     _banners()
-    if not os.path.exists(DB_PATH):
-        st.info(f"No database yet at `{DB_PATH}`. Run `python cli.py ci-tick` first.")
-    db = _db() if os.path.exists(DB_PATH) else None
+    db_path = _pick_db_path()
+    if not os.path.exists(db_path):
+        st.info(f"No database yet at `{db_path}`. Run the matching bot "
+                "(`ci-tick` for CEX, `dex-bot`/config_dex for on-chain) first.")
+    db = Database(db_path) if os.path.exists(db_path) else None
 
     tabs = st.tabs(["📈 Live", "🔎 Signals", "👁 Observe", "🏆 Ranking",
                     "🔬 Detail", "🗺 Heatmap", "📜 Audit"])
