@@ -1,55 +1,32 @@
-generated_ts: 1787322481555
+generated_ts: 1787328171583
 disclaimer: Attention = current activity, NOT a prediction. Most memecoins go to zero.
   Verify on RugCheck/GMGN/Axiom. This tool never places real orders.
 tokens:
-- symbol: TOESCOIN
-  mint: 6ehEcTMCc85aNF4x9CWx8HuvWGhxQtvKdhKVf2HDpump
-  chain: solana
-  attention: 89.0
-  tradeable: true
-  risk:
-    passed: true
-    reasons: []
-    checked: 8
-  features:
-    liquidity_usd: 334470.91
-    volume_24h_usd: 877243.49
-    volume_5m_usd: 6082.51
-    price_change_1h: -0.18
-    buys_5m: 159
-    sells_5m: 103
-    boosts: 100
-    has_socials: true
-    age_hours: 2261.1
-    pool_address: EE3zk9Fxp9guair2xeReFxf4TsEXeZFFuWETRna2PkcV
-  links:
-    dexscreener: https://dexscreener.com/solana/ee3zk9fxp9guair2xerefxf4tsexezffuwetrna2pkcv
-    rugcheck: https://rugcheck.xyz/tokens/6ehEcTMCc85aNF4x9CWx8HuvWGhxQtvKdhKVf2HDpump
-    gmgn: https://gmgn.ai/sol/token/6ehEcTMCc85aNF4x9CWx8HuvWGhxQtvKdhKVf2HDpump
-    axiom: https://axiom.trade/t/6ehEcTMCc85aNF4x9CWx8HuvWGhxQtvKdhKVf2HDpump
-    birdeye: https://birdeye.so/token/6ehEcTMCc85aNF4x9CWx8HuvWGhxQtvKdhKVf2HDpump?chain=solana
-  note: Attention is a snapshot of current activity, NOT a price prediction. Most
-    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
-    real money.
 - symbol: three
   mint: FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump
   chain: solana
-  attention: 78.2
+  attention: 78.7
   tradeable: true
   risk:
     passed: true
     reasons: []
     checked: 8
   features:
-    liquidity_usd: 256347.3
-    volume_24h_usd: 78449.18
-    volume_5m_usd: 709.52
-    price_change_1h: 3.46
-    buys_5m: 81
-    sells_5m: 30
+    liquidity_usd: 254457.26
+    volume_24h_usd: 99426.13
+    volume_5m_usd: 1061.66
+    price_change_1h: 0.42
+    price_change_6h: 0.9
+    price_change_24h: 5.95
+    price_usd: 0.001745
+    fdv: 1744613.0
+    market_cap: 1744613.0
+    buys_5m: 74
+    sells_5m: 35
     boosts: 10
     has_socials: true
-    age_hours: 2743.3
+    age_hours: 2744.9
+    dex: pumpswap
     pool_address: 5ByL7MZoLABYnwMPZKPKjf4MGkZ7FeBzrAnos19Pre2z
   links:
     dexscreener: https://dexscreener.com/solana/5byl7mzolabynwmpzkpkjf4mgkz7febzranos19pre2z
@@ -57,6 +34,9 @@ tokens:
     gmgn: https://gmgn.ai/sol/token/FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump
     axiom: https://axiom.trade/t/FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump
     birdeye: https://birdeye.so/token/FeMbDoX7R1Psc4GEcvJdsbNbZA3bfztcyDCatJVJpump?chain=solana
+    x_search: https://x.com/search?q=%24three&f=live
+    x_official: https://x.com/trythreews
+    website: https://three.ws/
   note: Attention is a snapshot of current activity, NOT a price prediction. Most
     memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
     real money.

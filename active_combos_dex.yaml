@@ -1,19 +1,7 @@
-generated_ts: 1787322482008
+generated_ts: 1787328171943
 note: On-chain DEX paper-trading combos (simulated money). Short on-chain history
   means many will be skipped by the data checks - intended.
 combos:
-- strategy: donchian_breakout
-  symbol: solana:EE3zk9Fxp9guair2xeReFxf4TsEXeZFFuWETRna2PkcV
-  params: {}
-  token: TOESCOIN
-- strategy: supertrend
-  symbol: solana:EE3zk9Fxp9guair2xeReFxf4TsEXeZFFuWETRna2PkcV
-  params: {}
-  token: TOESCOIN
-- strategy: ema_crossover
-  symbol: solana:EE3zk9Fxp9guair2xeReFxf4TsEXeZFFuWETRna2PkcV
-  params: {}
-  token: TOESCOIN
 - strategy: donchian_breakout
   symbol: solana:5ByL7MZoLABYnwMPZKPKjf4MGkZ7FeBzrAnos19Pre2z
   params: {}
