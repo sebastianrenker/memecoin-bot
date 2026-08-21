@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+state/
+*.db
+*.db-wal
+*.db-shm
+*.lock
+.venv/
+venv/
+# Keep the cloud state that CI commits back:
+!cloud/paper.db

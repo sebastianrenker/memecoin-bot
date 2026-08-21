@@ -1,0 +1,6 @@
+# Slim install for CI / GitHub Actions ci-tick (no dashboard, no test deps).
+pandas>=2.0
+numpy>=1.24
+PyYAML>=6.0
+ccxt>=4.0
+requests>=2.28

@@ -1,0 +1,87 @@
+# Memecoin Paper-Trading Analysis Tool — configuration
+#
+# This is a LEARNING / ANALYSIS tool that trades SIMULATED money only.
+# Live trading is a locked stub (execution/live.py raises LiveTradingNotEnabled).
+# Memecoins are extremely risky: most trend toward zero, rugpulls are common,
+# liquidity is thin and slippage is high. Nothing here is investment advice.
+
+mode: paper                    # paper | live  (live is locked and will refuse to run)
+
+data:
+  require_real: true           # NEVER fabricate data. Failed fetch -> skip the combo.
+  source: ccxt                 # ccxt (CEX, real OHLCV) | dex (on-chain, unreliable history)
+  exchange: binance            # ccxt exchange id
+  quote: USDT
+  timeframe: 1h
+  lookback_days: 180
+  cache_dir: .cache
+  cache_ttl_min: 30
+  max_retries: 4
+  backoff_base_sec: 1.5
+  # CEX-listed memecoins first (real OHLCV). Adjust to what your exchange lists.
+  universe:
+    - DOGE/USDT
+    - SHIB/USDT
+    - PEPE/USDT
+    - WIF/USDT
+    - BONK/USDT
+    - FLOKI/USDT
+  auto_discovery:
+    enabled: false             # discover top memecoins by volume/liquidity
+    top_n: 20
+    min_quote_volume: 5000000  # min 24h quote volume to be eligible
+    min_age_days: 30           # reject freshly-listed tokens (rug risk)
+
+engine:
+  initial_equity: 10000.0
+  fee_rate: 0.002              # per side; memecoins cost more than majors
+  slippage_rate: 0.003         # per side; thin books slip hard
+  risk_per_trade: 0.01         # 1% of equity risked at the stop — never loosen
+  leverage_cap: 1.0            # notional <= leverage_cap * equity
+  min_stop_frac: 0.005         # reject stops tighter than 0.5% of price (memecoins are jumpy)
+  take_profit_r: 2.0
+  allow_short: false           # memecoin borrow is unreliable; long-only by default
+  cost_multiplier: 2.0         # PESSIMISTIC default: double fees+slippage as a robustness check
+
+risk:
+  max_open_positions: 5
+  daily_loss_limit: 0.03       # 3% daily-loss circuit breaker (safe-hold, not process exit)
+  max_drawdown_kill: 0.25      # 25% total-drawdown kill switch
+
+validation:
+  walkforward:
+    train_frac: 0.6
+    test_frac: 0.4
+    folds: 4
+  montecarlo:
+    runs: 1000
+    ruin_drawdown: 0.5         # equity halving counts as "ruin"
+  min_trades: 20               # below this, results are noise
+  regime:
+    adx_period: 14
+    adx_trend_min: 20
+    vol_window: 20
+
+score:
+  weights:
+    edge: 0.35
+    robustness: 0.25
+    regime: 0.20
+    recency: 0.20
+  green_min: 65
+  yellow_min: 45
+
+optimize:
+  wf_efficiency_min: 0.5       # OOS/IS performance ratio required to accept params
+  min_trades: 20
+
+portfolio:
+  max_correlation: 0.7
+  quality_min_score: 50
+  method: inverse_vol
+
+memecoin_filters:
+  min_liquidity_usd: 50000
+  min_age_days: 30
+  min_volume_usd: 100000
+  max_top10_holder_pct: 0.6    # rug heuristic (only checked when data available)
