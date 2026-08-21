@@ -43,6 +43,7 @@ class TokenFeatures:
     fdv: float = 0.0
     market_cap: float = 0.0
     dex: str = ""
+    feed: str = ""              # which live feed it came from: new|trending|top|boosted
     socials: dict = field(default_factory=dict)   # {twitter,telegram,website}
 
 
@@ -144,7 +145,7 @@ def build_signal(f: TokenFeatures, meta: Optional[TokenMetadata],
                   "price_usd": f.price_usd, "fdv": f.fdv, "market_cap": f.market_cap,
                   "buys_5m": f.buys_5m, "sells_5m": f.sells_5m, "boosts": f.boosts,
                   "has_socials": f.has_socials, "age_hours": round(f.age_hours, 1),
-                  "dex": f.dex, "pool_address": f.pool_address},
+                  "dex": f.dex, "feed": f.feed, "pool_address": f.pool_address},
         links=token_links(f.mint, f.chain, f.pair_url, f.symbol, f.socials))
 
 
@@ -161,12 +162,25 @@ def build_watchlist(features: List[TokenFeatures], metas: Dict[str, Optional[Tok
 # --------------------------------------------------------------------------
 # Best-effort DexScreener fetchers (public, no key). Never raise; return [].
 # --------------------------------------------------------------------------
-def _get_json(url: str, timeout: float = 15.0):
+def _get_json(url: str, timeout: float = 15.0, retries: int = 3):
+    import time as _t
+
     import requests
-    r = requests.get(url, headers={"accept": "application/json"}, timeout=timeout)
-    if r.status_code != 200:
-        return None
-    return r.json()
+    for attempt in range(retries):
+        try:
+            r = requests.get(url, headers={"accept": "application/json"}, timeout=timeout)
+            if r.status_code == 200:
+                return r.json()
+            if r.status_code == 429 and attempt < retries - 1:
+                _t.sleep(2.0 * (attempt + 1))   # rate-limited: back off and retry
+                continue
+            return None
+        except Exception:
+            if attempt < retries - 1:
+                _t.sleep(1.0 * (attempt + 1))
+                continue
+            return None
+    return None
 
 
 def _extract_socials(info: dict) -> dict:
@@ -256,7 +270,103 @@ def fetch_dexscreener_boosted(chains="solana", limit: int = 30) -> List[TokenFea
             pairs.sort(key=lambda p: (p.get("liquidity") or {}).get("usd", 0) or 0, reverse=True)
             f = _features_from_pair(pairs[0])
             if f and f.mint:
+                f.feed = "boosted"
                 out.append(f)
+        return out
+    except Exception:
+        return []
+
+
+# GeckoTerminal network ids (differ from DexScreener: eth not ethereum).
+GT_NETWORKS = {"sol": "solana", "solana": "solana", "bnb": "bsc", "bsc": "bsc",
+               "eth": "eth", "ethereum": "eth", "base": "base"}
+_GT = "https://api.geckoterminal.com/api/v2"
+
+
+def _gt_pool_to_features(pool: dict, tokmap: dict, network: str, feed: str) -> Optional[TokenFeatures]:
+    try:
+        a = pool.get("attributes") or {}
+        rel = pool.get("relationships") or {}
+        base_id = ((rel.get("base_token") or {}).get("data") or {}).get("id") or ""
+        tok = tokmap.get(base_id, {})
+        mint = tok.get("address") or (base_id.split("_", 1)[-1] if "_" in base_id else base_id)
+        vol = a.get("volume_usd") or {}
+        pc = a.get("price_change_percentage") or {}
+        tx = (a.get("transactions") or {}).get("m5") or {}
+        created = a.get("pool_created_at")
+        age_h = 0.0
+        if created:
+            import datetime as _dt
+            try:
+                dtv = _dt.datetime.fromisoformat(created.replace("Z", "+00:00"))
+                age_h = max(0.0, (_dt.datetime.now(_dt.timezone.utc) - dtv).total_seconds() / 3600.0)
+            except Exception:
+                pass
+        dex_id = ((rel.get("dex") or {}).get("data") or {}).get("id") or ""
+        chain = {"solana": "solana", "bsc": "bsc", "eth": "ethereum", "base": "base"}.get(network, network)
+        return TokenFeatures(
+            symbol=tok.get("symbol") or (a.get("name") or "?").split(" ")[0],
+            mint=mint, chain=chain,
+            liquidity_usd=float(a.get("reserve_in_usd") or 0.0),
+            volume_24h_usd=float(vol.get("h24") or 0.0),
+            volume_5m_usd=float(vol.get("m5") or 0.0),
+            price_change_1h=float(pc.get("h1") or 0.0),
+            price_change_6h=float(pc.get("h6") or 0.0),
+            price_change_24h=float(pc.get("h24") or 0.0),
+            price_usd=float(a.get("base_token_price_usd") or 0.0),
+            fdv=float(a.get("fdv_usd") or 0.0),
+            market_cap=float(a.get("market_cap_usd") or 0.0),
+            dex=dex_id, feed=feed,
+            buys_5m=int(tx.get("buys") or 0), sells_5m=int(tx.get("sells") or 0),
+            age_hours=age_h, pool_address=a.get("address") or "",
+            pair_url=f"https://www.geckoterminal.com/{network}/pools/{a.get('address','')}")
+    except Exception:
+        return None
+
+
+def _gt_fetch_feed(network: str, feed: str, pages: int) -> List[TokenFeatures]:
+    ep = {"new": "new_pools", "trending": "trending_pools", "top": "pools"}[feed]
+    out: List[TokenFeatures] = []
+    for page in range(1, pages + 1):
+        data = _get_json(f"{_GT}/networks/{network}/{ep}?include=base_token&page={page}")
+        if not data:
+            break
+        tokmap = {t.get("id"): (t.get("attributes") or {})
+                  for t in (data.get("included") or []) if t.get("type") == "token"}
+        pools = data.get("data") or []
+        if not pools:
+            break
+        for p in pools:
+            f = _gt_pool_to_features(p, tokmap, network, feed)
+            if f and f.mint:
+                out.append(f)
+    return out
+
+
+def fetch_geckoterminal(chains="solana", feeds=("trending", "new", "top"),
+                        pages: int = 1, limit: int = 300) -> List[TokenFeatures]:
+    """Fetch MANY live coins across chains and feeds (new/trending/top pools).
+
+    This is the 'see every coin' feed (public GeckoTerminal API, no key). Dedups
+    by (chain, mint), keeping the first feed a coin appears in. Best-effort."""
+    try:
+        if isinstance(chains, str):
+            chains = [c.strip() for c in chains.split(",") if c.strip()]
+        if isinstance(feeds, str):
+            feeds = [c.strip() for c in feeds.split(",") if c.strip()]
+        seen = set()
+        out: List[TokenFeatures] = []
+        for c in chains:
+            net = GT_NETWORKS.get(c.lower(), c.lower())
+            for feed in feeds:
+                for f in _gt_fetch_feed(net, feed, pages):
+                    key = (f.chain, f.mint)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    out.append(f)
+                    if len(out) >= limit:
+                        return out
         return out
     except Exception:
         return []

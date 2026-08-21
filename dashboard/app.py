@@ -216,6 +216,22 @@ _DISCOVER_CSS = """
   color:#cbd3e1;font-size:.7rem;text-decoration:none;margin-right:4px;white-space:nowrap}
 .acts a.x{color:#8ab4ff;border-color:#2a3a5a}.acts a.ax{color:#14e0a0;border-color:#1c4a3a}
 .acts a.rc{color:#f2b3b3;border-color:#4a2a2a}
+/* Axiom-style column board */
+.axcolhead{display:flex;justify-content:space-between;align-items:center;
+  font-weight:700;font-size:.85rem;color:#e6e9ef;padding:6px 8px;border-bottom:1px solid #1e2430;
+  position:sticky;top:0;background:#0a0e17;z-index:2}
+.axcolhead .cnt{color:#7f889c;font-size:.72rem;font-weight:600}
+.axcol{max-height:74vh;overflow-y:auto;padding-right:4px}
+.axcol::-webkit-scrollbar{width:8px}.axcol::-webkit-scrollbar-thumb{background:#232a38;border-radius:8px}
+.axc{background:#121722;border:1px solid #1e2430;border-radius:10px;padding:8px 10px;margin:6px 0}
+.axc:hover{border-color:#2b64ff;background:#141b28}
+.axc.no{border-left:3px solid #7a2a2a}.axc.ok{border-left:3px solid #1c5a3a}
+.axc-h{display:flex;align-items:center;gap:6px}
+.axc-h .age{margin-left:auto;color:#7f889c;font-size:.68rem}
+.axc-p{display:flex;gap:10px;align-items:baseline;margin:3px 0}
+.axc-p .price{font-weight:700}
+.axc-s{color:#9aa3b5;font-size:.72rem;font-variant-numeric:tabular-nums}
+.axc-f{display:flex;align-items:center;gap:6px;margin-top:6px}
 </style>
 """
 
@@ -288,22 +304,16 @@ def tab_discover() -> None:
     view.sort(key=keyf, reverse=True)
 
     st.markdown(_DISCOVER_CSS, unsafe_allow_html=True)
-    st.markdown('<div class="ax-head"><div>Coin</div><div>Price</div><div>24h</div>'
-                '<div>Mkt Cap</div><div>Liquidity</div><div>Volume 24h</div><div>Age</div>'
-                '<div>Attention</div><div>Risk / actions</div></div>', unsafe_allow_html=True)
 
-    html_rows = []
-    for t in view:
+    def _card(t) -> str:
         f, lk = t.get("features", {}), t.get("links", {})
         chain = t.get("chain", "solana")
         ch24 = f.get("price_change_24h", 0) or 0
         chcls = "pos" if ch24 >= 0 else "neg"
-        att = float(t.get("attention", 0) or 0)
         ok = bool(t.get("tradeable"))
-        pill = f'<div class="pill {"ok" if ok else "no"}">{"tradeable" if ok else "avoid"}</div>'
+        att = float(t.get("attention", 0) or 0)
         age_h = f.get("age_hours", 0) or 0
         age = f"{age_h/24:.1f}d" if age_h >= 24 else f"{age_h:.0f}h"
-        mint = t.get("mint", "")
         acts = []
         if lk.get("x_search"):
             acts.append(f'<a class="x" target="_blank" href="{_esc(lk["x_search"])}">X</a>')
@@ -315,30 +325,42 @@ def tab_discover() -> None:
             acts.append(f'<a target="_blank" href="{_esc(lk["gmgn"])}">GMGN</a>')
         if lk.get("dexscreener"):
             acts.append(f'<a target="_blank" href="{_esc(lk["dexscreener"])}">Dex</a>')
-        html_rows.append(
-            f'<div class="ax-row">'
-            f'<div><span class="ax-sym">{_esc(t.get("symbol"))}</span>'
+        return (
+            f'<div class="axc {"ok" if ok else "no"}">'
+            f'<div class="axc-h"><b>{_esc(t.get("symbol"))}</b>'
             f'<span class="chip {chain}">{_esc(chain)}</span>'
-            f'<div class="ax-mint">{_esc(mint[:14])}{"…" if len(mint)>14 else ""}</div></div>'
-            f'<div class="num">{_fmt_price(f.get("price_usd"))}</div>'
-            f'<div class="num {chcls}">{ch24:+.1f}%</div>'
-            f'<div class="num">{_fmt_usd(f.get("market_cap") or f.get("fdv"))}</div>'
-            f'<div class="num">{_fmt_usd(f.get("liquidity_usd"))}</div>'
-            f'<div class="num">{_fmt_usd(f.get("volume_24h_usd"))}</div>'
-            f'<div class="num mut">{age}</div>'
-            f'<div><div class="abar"><i style="width:{max(3,min(100,att)):.0f}%"></i></div>'
-            f'<div class="mut" style="font-size:.66rem">{att:.0f}/100</div></div>'
-            f'<div>{pill}<div class="acts" style="margin-top:5px">{"".join(acts)}</div></div>'
+            f'<span class="age">{age}</span></div>'
+            f'<div class="axc-p"><span class="price num">{_fmt_price(f.get("price_usd"))}</span>'
+            f'<span class="num {chcls}">{ch24:+.1f}%</span>'
+            f'<span class="mut" style="margin-left:auto;font-size:.68rem">att {att:.0f}</span></div>'
+            f'<div class="axc-s">MC {_fmt_usd(f.get("market_cap") or f.get("fdv"))} · '
+            f'Liq {_fmt_usd(f.get("liquidity_usd"))} · Vol {_fmt_usd(f.get("volume_24h_usd"))}</div>'
+            f'<div class="axc-f"><span class="pill {"ok" if ok else "no"}">'
+            f'{"tradeable" if ok else "avoid"}</span><span class="acts">{"".join(acts)}</span></div>'
             f'</div>')
-    st.markdown("".join(html_rows), unsafe_allow_html=True)
+
+    feed_titles = [("new", "🆕 New"), ("trending", "🔥 Trending"),
+                   ("top", "📊 Top Volume"), ("boosted", "🚀 Boosted")]
+    present = [(fid, title) for fid, title in feed_titles
+               if any(t.get("features", {}).get("feed") == fid for t in view)]
+    if not present:
+        present = [("", "All coins")]
+
+    cols = st.columns(len(present))
+    for (fid, title), col in zip(present, cols):
+        items = [t for t in view if (fid == "" or t.get("features", {}).get("feed") == fid)]
+        cards = "".join(_card(t) for t in items) or '<div class="mut" style="padding:8px">none</div>'
+        col.markdown(f'<div class="axcolhead">{title}<span class="cnt">{len(items)}</span></div>'
+                     f'<div class="axcol">{cards}</div>', unsafe_allow_html=True)
 
     n_ok = sum(1 for t in tokens if t.get("tradeable"))
-    st.caption(f"{len(view)} shown · {len(tokens)} scanned · {n_ok} passed the rug filters. "
-               "Most trending coins fail — the honest reality, not a bug.")
+    st.caption(f"{len(view)} coins shown · {len(tokens)} scanned · {n_ok} passed the rug filters. "
+               "Green cards passed, red did not. Most coins fail — the honest reality, not a bug. "
+               "Attention = activity now, not a forecast.")
 
-    # Per-coin detail
     with st.expander("Per-coin detail (all data + flags + links)"):
-        labels = [f"{t.get('symbol')} ({t.get('chain')})" for t in view]
+        labels = [f"{t.get('symbol')} · {t.get('chain')} · {t.get('features',{}).get('feed','')}"
+                  for t in view]
         if labels:
             pick = st.selectbox("Coin", labels)
             tok = view[labels.index(pick)]
@@ -348,7 +370,7 @@ def tab_discover() -> None:
             st.json({k: f.get(k) for k in
                      ["price_usd", "liquidity_usd", "volume_24h_usd", "market_cap", "fdv",
                       "price_change_1h", "price_change_6h", "price_change_24h", "age_hours",
-                      "buys_5m", "sells_5m", "boosts", "dex", "pool_address"] if k in f})
+                      "buys_5m", "sells_5m", "boosts", "dex", "feed", "pool_address"] if k in f})
             st.markdown("**Links:** " + " · ".join(
                 f"[{name}]({url})" for name, url in lk.items() if url))
 

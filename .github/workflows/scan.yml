@@ -26,8 +26,8 @@ jobs:
           python-version: "3.12"
       - name: Abhaengigkeiten installieren
         run: pip install -r requirements-ci.txt
-      - name: Scan (echte Daten, best-effort)
-        run: python cli.py scan --limit 25 --out watchlist.yaml || echo "scan degraded (network) - keeping previous watchlist"
+      - name: Scan (viele Coins: new/trending/top, multi-chain; best-effort)
+        run: python cli.py scan --chains sol,bnb,eth --feeds trending,new,top --pages 1 --rugcheck --rugcheck-limit 15 --out watchlist.yaml || echo "scan degraded (network) - keeping previous watchlist"
       - name: Watchlist zurueck committen
         run: |
           git config user.name "memecoin-bot"

@@ -401,18 +401,33 @@ def cmd_scan(args) -> int:
     _banner()
     from data.memecoin_filters import (FilterConfig, fetch_goplus_solana,
                                         fetch_rugcheck, merge_metadata)
-    from data.signals import build_watchlist, fetch_dexscreener_boosted
-    print(f"\nScanning boosted [{args.chains}] tokens (attention + rug filters)... "
-          "(real data; best-effort)\n")
-    feats = fetch_dexscreener_boosted(args.chains, limit=args.limit)
+    from data.signals import (build_watchlist, fetch_dexscreener_boosted,
+                              fetch_geckoterminal)
+    print(f"\nScanning [{args.chains}] via {args.source} feeds=[{args.feeds}] "
+          f"(real data; best-effort)\n")
+    feats = []
+    if args.source in ("gecko", "both"):
+        feats += fetch_geckoterminal(args.chains, feeds=args.feeds, pages=args.pages,
+                                     limit=args.limit)
+    if args.source in ("dexscreener", "both"):
+        feats += fetch_dexscreener_boosted(args.chains, limit=args.limit)
+    # Dedupe by (chain, mint), first feed wins.
+    seen, uniq = set(), []
+    for f in feats:
+        k = (f.chain, f.mint)
+        if f.mint and k not in seen:
+            seen.add(k)
+            uniq.append(f)
+    feats = uniq
     if not feats:
         print("No live token data returned (network/rate-limit). Nothing faked.")
         return 1
     metas = {}
-    if not args.no_rugcheck:
-        for f in feats:
-            if f.chain != "solana":     # RugCheck is Solana-only; other chains keep DexScreener data
-                continue
+    if args.rugcheck:
+        # RugCheck is Solana-only and slow; enrich the busiest N Solana coins.
+        sol = sorted([f for f in feats if f.chain == "solana"],
+                     key=lambda f: f.volume_24h_usd, reverse=True)[: args.rugcheck_limit]
+        for f in sol:
             rc = fetch_rugcheck(f.mint)
             gp = fetch_goplus_solana(f.mint) if args.goplus else None
             metas[f.mint] = merge_metadata(rc, gp)
@@ -584,11 +599,16 @@ def build_parser() -> argparse.ArgumentParser:
     op.add_argument("--symbol", required=True)
     op.set_defaults(func=cmd_optimize)
 
-    sc = sub.add_parser("scan", help="scan active on-chain memecoins (attention + rug filters)")
+    sc = sub.add_parser("scan", help="scan the live coin feed (attention + rug filters)")
     sc.add_argument("--chains", default="sol", help="comma list: sol,bnb,eth,base")
-    sc.add_argument("--limit", type=int, default=25)
+    sc.add_argument("--source", default="gecko", choices=["gecko", "dexscreener", "both"],
+                    help="gecko = many live coins (new/trending/top); dexscreener = boosted")
+    sc.add_argument("--feeds", default="trending,new,top", help="gecko feeds: trending,new,top")
+    sc.add_argument("--pages", type=int, default=1, help="gecko pages per feed (20 coins/page)")
+    sc.add_argument("--limit", type=int, default=200)
     sc.add_argument("--tradeable-only", action="store_true", help="only tokens passing rug filters")
-    sc.add_argument("--no-rugcheck", action="store_true", help="skip RugCheck (faster, fewer checks)")
+    sc.add_argument("--rugcheck", action="store_true", help="enrich busiest Solana coins with RugCheck")
+    sc.add_argument("--rugcheck-limit", type=int, default=25)
     sc.add_argument("--goplus", action="store_true", help="also query GoPlus security")
     sc.add_argument("--out", default="watchlist.yaml")
     sc.set_defaults(func=cmd_scan)
@@ -621,6 +641,12 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    # Coin symbols can contain emoji; make console output robust on Windows cp1252.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     parser = build_parser()
     args = parser.parse_args(argv)
     try:
