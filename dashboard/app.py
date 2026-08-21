@@ -94,18 +94,44 @@ def _render_live(db: Database) -> None:
     kind = "green" if status == "running" else ("amber" if status == "safe_hold" else "red")
     st.markdown(f"### Live Paper-Trader &nbsp; {_pill(status, kind)}", unsafe_allow_html=True)
 
-    # KPIs
-    init_eq = 10000.0
+    # --- "Macht er Geld?" — the profit verdict (paper / theoretical) -------
+    curve = db.equity_curve(20000)
+    start_eq = curve[0][1] if curve else 10000.0
+    cur_eq = (eq if eq is not None else (curve[-1][1] if curve else start_eq))
+    pnl_abs = cur_eq - start_eq
+    pnl_pct = (pnl_abs / start_eq * 100.0) if start_eq else 0.0
+    realized = sum(t["pnl"] for t in trades)
+    gp = sum(t["pnl"] for t in trades if t["pnl"] > 0)
+    gl = -sum(t["pnl"] for t in trades if t["pnl"] < 0)
+    pf = (gp / gl) if gl > 0 else (float("inf") if gp > 0 else 0.0)
     wins = [t for t in trades if t["pnl"] > 0]
     wr = (len(wins) / len(trades) * 100.0) if trades else 0.0
-    m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Equity (sim)", f"{eq:,.0f}" if eq is not None else "-",
-              f"{(eq/init_eq-1)*100:+.2f}%" if eq else None)
-    m2.metric("Open positions", len(positions))
-    m3.metric("Closed trades", len(trades))
-    m4.metric("Win rate", f"{wr:.0f}%")
+    unrealized = pnl_abs - realized
+
+    up = pnl_abs >= 0
+    color = "#123d24" if up else "#3d1414"
+    fg = "#5ee08a" if up else "#ff8a8a"
+    verdict = "✅ Macht Geld (Paper)" if pnl_abs > 0 else (
+        "➖ Bei ±0 (Paper)" if abs(pnl_abs) < 1e-9 else "🔻 Verliert Geld (Paper)")
+    st.markdown(
+        f'<div style="background:{color};border:1px solid {fg}33;border-radius:14px;'
+        f'padding:14px 18px;margin:6px 0 12px">'
+        f'<div style="color:{fg};font-size:1.5rem;font-weight:800">{verdict} &nbsp; '
+        f'{pnl_pct:+.2f}% &nbsp;<span style="font-size:1rem">({pnl_abs:+,.2f} sim)</span></div>'
+        f'<div style="color:#c9d2e0;font-size:.82rem;margin-top:4px">'
+        f'Start {start_eq:,.0f} → jetzt {cur_eq:,.2f} · realisiert {realized:+,.2f} · '
+        f'offen (unrealisiert) {unrealized:+,.2f} · theoretisch/simuliert, kein echtes Geld</div>'
+        f'</div>', unsafe_allow_html=True)
+
+    # KPIs
+    m1, m2, m3, m4, m5, m6 = st.columns(6)
+    m1.metric("Equity (sim)", f"{cur_eq:,.2f}", f"{pnl_pct:+.2f}%")
+    m2.metric("P&L (sim)", f"{pnl_abs:+,.2f}")
+    m3.metric("Win rate", f"{wr:.0f}%", f"{len(wins)}/{len(trades)}")
+    m4.metric("Profit factor", "∞" if pf == float("inf") else f"{pf:.2f}")
+    m5.metric("Open positions", len(positions))
     age = (time.time() * 1000 - hb["ts"]) / 1000 if hb.get("ts") else None
-    m5.metric("Heartbeat age", f"{age:.0f}s" if age is not None else "-")
+    m6.metric("Heartbeat age", f"{age:.0f}s" if age is not None else "-")
 
     if not READONLY:
         c1, c2, c3, c4 = st.columns(4)
