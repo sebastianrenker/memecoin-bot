@@ -272,7 +272,7 @@ def cmd_ci_tick(args) -> int:
     trader = PaperTrader(s, data, db, combos)
     trader.recover_state()
     result = trader.tick()
-    _write_status_report(db, s, result)
+    _write_status_report(db, s, result, path=getattr(args, "report", "BOT_STATUS_REPORT.md"))
     db.checkpoint()
     db.close()
     print(f"ci-tick done: {result}")
@@ -438,6 +438,68 @@ def cmd_scan(args) -> int:
     return 0
 
 
+def cmd_dex_combos(args) -> int:
+    """Turn the tradeable watchlist into DEX paper-trading combos (network:pool)."""
+    if not os.path.exists(args.watchlist):
+        print(f"No {args.watchlist}. Run `python cli.py scan --tradeable-only` first.")
+        return 1
+    data = yaml.safe_load(open(args.watchlist, encoding="utf-8")) or {}
+    strategies = [s.strip() for s in args.strategies.split(",") if s.strip()]
+    combos = []
+    seen = set()
+    for t in data.get("tokens", []):
+        if args.tradeable_only and not t.get("tradeable"):
+            continue
+        pool = (t.get("features") or {}).get("pool_address")
+        chain = t.get("chain", "solana")
+        if not pool:
+            continue
+        symbol = f"{chain}:{pool}"
+        if symbol in seen:
+            continue
+        seen.add(symbol)
+        for st in strategies:
+            combos.append({"strategy": st, "symbol": symbol, "params": {},
+                           "token": t.get("symbol")})
+    out = {"generated_ts": int(time.time() * 1000),
+           "note": ("On-chain DEX paper-trading combos (simulated money). Short on-chain "
+                    "history means many will be skipped by the data checks - intended."),
+           "combos": combos}
+    with open(args.out, "w", encoding="utf-8") as fh:
+        yaml.safe_dump(out, fh, sort_keys=False, allow_unicode=True)
+    print(f"Wrote {len(combos)} DEX combos ({len(seen)} tokens x {len(strategies)} strategies) "
+          f"to {args.out}")
+    print(f"Run: python cli.py --config config/config_dex.yaml serve --active {args.out}")
+    return 0
+
+
+def cmd_advise(args) -> int:
+    """Free local advisor: turn the bot's own numbers into a paper-only recommendation."""
+    _banner()
+    from core.advisor import advise, ollama_summary
+    from data.memecoin_filters import FilterVerdict
+    if not os.path.exists(args.watchlist):
+        print(f"No {args.watchlist}. Run `python cli.py scan` first.")
+        return 1
+    data = yaml.safe_load(open(args.watchlist, encoding="utf-8")) or {}
+    tokens = data.get("tokens", [])[: args.limit]
+    print(f"\n{'action':<16}{'conf':>5}  {'symbol':<12} reasons")
+    print("-" * 90)
+    for t in tokens:
+        rv = t.get("risk", {})
+        verdict = FilterVerdict(passed=rv.get("passed", True), reasons=rv.get("reasons", []),
+                                checked=rv.get("checked", 0))
+        adv = advise(rug_verdict=verdict, attention=t.get("attention"))
+        print(f"{adv.action:<16}{adv.confidence:>5.2f}  {t.get('symbol',''):<12} "
+              f"{'; '.join(adv.reasons[:2])[:52]}")
+        if args.ollama:
+            txt = ollama_summary(adv, context=f"token {t.get('symbol')}", model=args.model)
+            if txt:
+                print(f"    LLM: {txt}")
+    print("\n" + advise().disclaimer)
+    return 0
+
+
 def cmd_status(args) -> int:
     from persistence.db import Database
     db = Database(_resolve_db(DEFAULT_DB))
@@ -503,6 +565,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     ci = sub.add_parser("ci-tick", help="one paper tick for CI/cloud")
     ci.add_argument("--active", default="active_combos.yaml")
+    ci.add_argument("--report", default="BOT_STATUS_REPORT.md")
     ci.set_defaults(func=cmd_ci_tick)
 
     stx = sub.add_parser("stress", help="million-trade risk stress test on a combo")
@@ -524,6 +587,20 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--goplus", action="store_true", help="also query GoPlus security")
     sc.add_argument("--out", default="watchlist.yaml")
     sc.set_defaults(func=cmd_scan)
+
+    dc = sub.add_parser("dex-combos", help="build DEX paper-trading combos from the watchlist")
+    dc.add_argument("--watchlist", default="watchlist.yaml")
+    dc.add_argument("--out", default="active_combos_dex.yaml")
+    dc.add_argument("--strategies", default="donchian_breakout,supertrend,ema_crossover")
+    dc.add_argument("--tradeable-only", action="store_true", default=True)
+    dc.set_defaults(func=cmd_dex_combos)
+
+    ad = sub.add_parser("advise", help="free local advisor over the watchlist (paper only)")
+    ad.add_argument("--watchlist", default="watchlist.yaml")
+    ad.add_argument("--limit", type=int, default=25)
+    ad.add_argument("--ollama", action="store_true", help="phrase via a free local Ollama model")
+    ad.add_argument("--model", default="llama3.2")
+    ad.set_defaults(func=cmd_advise)
 
     st = sub.add_parser("status", help="print current status")
     st.set_defaults(func=cmd_status)

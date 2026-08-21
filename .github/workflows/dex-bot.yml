@@ -1,0 +1,53 @@
+name: dex-bot
+
+# Autonomer ON-CHAIN Paper-Bot: scannt aktive Solana-Memecoins, filtert Rugs raus,
+# baut daraus handelbare Kombis und fuehrt EINEN Paper-Tick auf echten On-Chain-Daten
+# (GeckoTerminal) aus. Committet cloud/dex.db + DEX_STATUS_REPORT.md zurueck.
+#
+# EHRLICH: On-Chain-Historie ist kurz; die meisten Token fallen (absichtlich) durch die
+# Daten-/Rug-Checks und werden uebersprungen. Kein echtes Geld. Live-Handel gesperrt.
+
+on:
+  schedule:
+    - cron: "42 * * * *"        # stuendlich, versetzt zu paper-tick/scan
+  workflow_dispatch: {}
+
+concurrency:
+  group: dex-bot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    env:
+      TRADING_DB: cloud/dex.db
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhaengigkeiten installieren
+        run: pip install -r requirements-ci.txt
+      - name: Scan + handelbare Kombis bauen (best-effort)
+        run: |
+          python cli.py scan --tradeable-only --limit 25 --out watchlist_dex.yaml || echo "scan degraded"
+          python cli.py dex-combos --watchlist watchlist_dex.yaml --out active_combos_dex.yaml || echo "no tradeable tokens"
+      - name: On-Chain Paper-Tick (echte Daten, simuliertes Geld)
+        run: |
+          mkdir -p cloud
+          python cli.py --config config/config_dex.yaml ci-tick --active active_combos_dex.yaml --report DEX_STATUS_REPORT.md
+      - name: Zustand zurueck committen
+        run: |
+          git config user.name "memecoin-bot"
+          git config user.email "memecoin-bot@users.noreply.github.com"
+          git add -f cloud/dex.db DEX_STATUS_REPORT.md active_combos_dex.yaml watchlist_dex.yaml
+          if git diff --cached --quiet; then
+            echo "Keine Aenderung."
+          else
+            git commit -m "dex-bot: on-chain tick $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+            git pull --rebase --autostash origin ${GITHUB_REF_NAME} || true
+            git push
+          fi

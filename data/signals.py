@@ -36,6 +36,7 @@ class TokenFeatures:
     has_socials: bool = False
     age_hours: float = 0.0
     pair_url: str = ""
+    pool_address: str = ""      # AMM pool address (for on-chain OHLCV via GeckoTerminal)
 
 
 @dataclass
@@ -112,7 +113,8 @@ def build_signal(f: TokenFeatures, meta: Optional[TokenMetadata],
         features={"liquidity_usd": f.liquidity_usd, "volume_24h_usd": f.volume_24h_usd,
                   "volume_5m_usd": f.volume_5m_usd, "price_change_1h": f.price_change_1h,
                   "buys_5m": f.buys_5m, "sells_5m": f.sells_5m, "boosts": f.boosts,
-                  "has_socials": f.has_socials, "age_hours": round(f.age_hours, 1)},
+                  "has_socials": f.has_socials, "age_hours": round(f.age_hours, 1),
+                  "pool_address": f.pool_address},
         links=token_links(f.mint, f.chain, f.pair_url))
 
 
@@ -158,7 +160,8 @@ def _features_from_pair(p: dict) -> Optional[TokenFeatures]:
             buys_5m=int(m5.get("buys") or 0), sells_5m=int(m5.get("sells") or 0),
             boosts=int((p.get("boosts") or {}).get("active") or 0),
             has_socials=bool((p.get("info") or {}).get("socials")),
-            age_hours=age_h, pair_url=p.get("url") or "")
+            age_hours=age_h, pair_url=p.get("url") or "",
+            pool_address=p.get("pairAddress") or "")
     except Exception:
         return None
 

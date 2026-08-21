@@ -11,3 +11,4 @@ state/
 venv/
 # Keep the cloud state that CI commits back:
 !cloud/paper.db
+!cloud/dex.db

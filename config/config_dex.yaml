@@ -1,0 +1,62 @@
+# On-chain (DEX) paper-trading config. Use with combos built from the watchlist:
+#   python cli.py scan --tradeable-only
+#   python cli.py dex-combos --out active_combos_dex.yaml
+#   python cli.py --config config/config_dex.yaml serve --active active_combos_dex.yaml
+#
+# HONEST WARNING: on-chain OHLCV history is short and patchy. Many tokens will
+# (correctly) fail the data checks and be skipped. That is intended behaviour.
+# SIMULATED money only. Live trading is locked.
+
+mode: paper
+
+data:
+  require_real: true
+  source: dex                  # GeckoTerminal on-chain OHLCV
+  quote: USD
+  timeframe: 1h
+  lookback_days: 30
+  cache_dir: .cache
+  cache_ttl_min: 15
+  max_retries: 4
+  backoff_base_sec: 1.5
+  universe: []                 # combos come from active_combos_dex.yaml
+  auto_discovery:
+    enabled: false
+
+engine:
+  initial_equity: 10000.0
+  fee_rate: 0.003              # on-chain swaps + priority fees are pricier
+  slippage_rate: 0.006         # thin pools slip hard
+  risk_per_trade: 0.01
+  leverage_cap: 1.0
+  min_stop_frac: 0.01          # on-chain moves are violent -> wider min stop
+  take_profit_r: 2.0
+  allow_short: false
+  cost_multiplier: 2.0         # pessimistic default
+
+risk:
+  max_open_positions: 5
+  daily_loss_limit: 0.03
+  max_drawdown_kill: 0.25
+
+validation:
+  walkforward: {train_frac: 0.6, test_frac: 0.4, folds: 4}
+  montecarlo: {runs: 1000, ruin_drawdown: 0.5}
+  min_trades: 20
+  regime: {adx_period: 14, adx_trend_min: 20, vol_window: 20}
+
+score:
+  weights: {edge: 0.35, robustness: 0.25, regime: 0.20, recency: 0.20}
+  green_min: 65
+  yellow_min: 45
+
+optimize: {wf_efficiency_min: 0.5, min_trades: 20}
+portfolio: {max_correlation: 0.7, quality_min_score: 50, method: inverse_vol}
+memecoin_filters:
+  min_liquidity_usd: 20000
+  min_age_days: 3
+  min_volume_usd: 30000
+
+# Strategies the DEX self-trader rotates through (trend/breakout favoured on memecoins).
+active:
+  strategies: [donchian_breakout, supertrend, ema_crossover]

@@ -103,6 +103,34 @@ overlay for Axiom/GMGN) — the bot itself stays paper-only and never routes ord
 anywhere. See [`RECHERCHE_MEMECOIN.md`](RECHERCHE_MEMECOIN.md) for the sourced
 research behind all of this.
 
+## On-chain self-trading (paper) + a free local advisor
+
+Let the bot **paper-trade the filtered on-chain tokens itself**, on real
+GeckoTerminal candles:
+
+```bash
+python cli.py scan --tradeable-only                 # only tokens passing rug filters
+python cli.py dex-combos --out active_combos_dex.yaml
+python cli.py --config config/config_dex.yaml serve --active active_combos_dex.yaml
+```
+
+The `dex-bot` GitHub Actions workflow does this automatically in the cloud
+(separate `cloud/dex.db` + `DEX_STATUS_REPORT.md`). Honest caveat: on-chain
+history is short, so **many tokens are correctly skipped** by the data checks.
+
+**The "AI".** There is no free (or paid) AI that reliably trades memecoins
+profitably — anything sold as such is hype or a scam. Instead there's a free,
+**local, transparent advisor** that turns the bot's *own* numbers (score + rug
+verdict + attention) into a plain recommendation with reasons:
+
+```bash
+python cli.py advise                 # deterministic, offline
+python cli.py advise --ollama        # optional: phrase it via a FREE local Ollama model
+```
+
+It only ever recommends `avoid` / `watch` / `paper_consider` — never a real-money
+order, and a failed rug check always overrides everything.
+
 ## Honest expectations
 
 This tool quantifies **risk** and describes **past simulated behaviour**. It does
