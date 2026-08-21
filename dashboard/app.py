@@ -457,22 +457,16 @@ def main() -> None:
                 "(`ci-tick` for CEX, `dex-bot`/config_dex for on-chain) first.")
     db = Database(db_path) if os.path.exists(db_path) else None
 
-    tabs = st.tabs(["📈 Live", "🔎 Discover", "👁 Observe", "🏆 Ranking",
-                    "🔬 Detail", "🗺 Heatmap", "📜 Audit"])
+    # Only the three views that actually carry live, readable data. The
+    # evaluation-based tabs (ranking/detail/heatmap/audit) are only meaningful
+    # after `rank --db`; their functions remain defined below for easy re-enable.
+    tabs = st.tabs(["📈 Live", "🔎 Discover", "👁 Observe"])
     with tabs[0]:
         tab_live(db) if db else st.caption("No data yet.")
     with tabs[1]:
         tab_discover()
     with tabs[2]:
         tab_observe()
-    with tabs[3]:
-        tab_ranking(db) if db else st.caption("No data yet.")
-    with tabs[4]:
-        tab_detail(db) if db else st.caption("No data yet.")
-    with tabs[5]:
-        tab_heatmap(db) if db else st.caption("No data yet.")
-    with tabs[6]:
-        tab_audit(db) if db else st.caption("No data yet.")
     if db:
         db.close()
 
