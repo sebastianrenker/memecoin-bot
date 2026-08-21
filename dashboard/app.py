@@ -62,7 +62,28 @@ def _pill(text: str, kind: str) -> str:
 
 
 # --------------------------------------------------------------------------
-def tab_live(db: Database) -> None:
+def tab_live(db_path: str, auto: bool = False, secs: int = 15) -> None:
+    # Only the Live tab auto-refreshes, and it reruns just this fragment in
+    # place — so switching to other tabs is no longer interrupted by a full
+    # page reload. The fragment opens its OWN db connection each run, because it
+    # reruns after main() has already closed the shared one.
+    interval = f"{secs}s" if auto else None
+    try:
+        runner = st.fragment(run_every=interval)
+    except Exception:
+        runner = (lambda f: f)  # very old Streamlit: just render once
+
+    @runner
+    def _render():
+        db = Database(db_path)
+        try:
+            _render_live(db)
+        finally:
+            db.close()
+    _render()
+
+
+def _render_live(db: Database) -> None:
     row = db.conn.execute("SELECT * FROM heartbeat WHERE id=1").fetchone()
     hb = dict(row) if row else {}
     eq = db.last_equity()
@@ -434,16 +455,10 @@ def _pick_db_path() -> str:
         path = candidates[choice]
         st.caption(f"DB: `{path}`" + ("" if os.path.exists(path) else "  · not created yet"))
         st.markdown("### Live view")
-        auto = st.checkbox("Auto-refresh (like MockApe)", value=True)
+        auto = st.checkbox("Auto-refresh (Live tab only)", value=True)
         secs = st.slider("Every N seconds", 5, 60, 15, disabled=not auto)
-        if auto:
-            try:
-                from streamlit.components.v1 import html
-                html(f"<script>setTimeout(function(){{window.parent.location.reload();}}, {secs*1000});</script>",
-                     height=0)
-            except Exception:
-                pass
-    return path
+        st.caption("Refreshes only the Live tab in place — other tabs stay put.")
+    return path, auto, secs
 
 
 def main() -> None:
@@ -451,22 +466,28 @@ def main() -> None:
     st.markdown(_CSS, unsafe_allow_html=True)
     st.title("🎲 Memecoin Paper-Trading Analysis")
     _banners()
-    db_path = _pick_db_path()
+    db_path, auto, secs = _pick_db_path()
     if not os.path.exists(db_path):
         st.info(f"No database yet at `{db_path}`. Run the matching bot "
                 "(`ci-tick` for CEX, `dex-bot`/config_dex for on-chain) first.")
     db = Database(db_path) if os.path.exists(db_path) else None
 
-    # Only the three views that actually carry live, readable data. The
-    # evaluation-based tabs (ranking/detail/heatmap/audit) are only meaningful
-    # after `rank --db`; their functions remain defined below for easy re-enable.
-    tabs = st.tabs(["📈 Live", "🔎 Discover", "👁 Observe"])
+    tabs = st.tabs(["📈 Live", "🔎 Discover", "👁 Observe", "🏆 Ranking",
+                    "🔬 Detail", "🗺 Heatmap", "📜 Audit"])
     with tabs[0]:
-        tab_live(db) if db else st.caption("No data yet.")
+        tab_live(db_path, auto, secs) if db else st.caption("No data yet.")
     with tabs[1]:
         tab_discover()
     with tabs[2]:
         tab_observe()
+    with tabs[3]:
+        tab_ranking(db) if db else st.caption("No data yet.")
+    with tabs[4]:
+        tab_detail(db) if db else st.caption("No data yet.")
+    with tabs[5]:
+        tab_heatmap(db) if db else st.caption("No data yet.")
+    with tabs[6]:
+        tab_audit(db) if db else st.caption("No data yet.")
     if db:
         db.close()
 
