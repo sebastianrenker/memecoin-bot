@@ -170,12 +170,13 @@ def _candles_with_markers(db: Database, positions, trades) -> None:
     st.altair_chart(alt.layer(*layers).interactive(), use_container_width=True)
 
 
-def tab_signals() -> None:
-    st.markdown("### Signals & Watchlist")
-    st.info("**Attention ≠ prediction.** This ranks how much activity a token has "
-            "RIGHT NOW. By the time a coin trends, you are usually late. Every row links "
-            "out so you can verify on RugCheck / GMGN / Axiom before risking anything. "
-            "Refresh with `python cli.py scan`.")
+def tab_discover() -> None:
+    st.markdown("### Discover — live coins, classified")
+    st.info("Everything the tool knows about the currently-active coins: on-chain data, "
+            "a **risk classification**, an **attention** rank (activity NOW, not a forecast), "
+            "and a link straight to the **live X/Twitter feed** for each coin. There is no "
+            "free reliable auto-sentiment — so you get the real live feed instead. Refresh "
+            "with `python cli.py scan --chains sol,bnb,eth`.")
     if not os.path.exists(WATCHLIST_PATH):
         st.caption(f"No `{WATCHLIST_PATH}` yet. Run `python cli.py scan` to generate it.")
         return
@@ -189,31 +190,69 @@ def tab_signals() -> None:
     if not tokens:
         st.caption("Watchlist is empty.")
         return
+
+    try:
+        from core.advisor import advise
+        from data.memecoin_filters import FilterVerdict
+        have_adv = True
+    except Exception:
+        have_adv = False
+
     rows = []
     for t in tokens:
         f = t.get("features", {})
         lk = t.get("links", {})
+        verdict = None
+        action = "-"
+        if have_adv:
+            rv = t.get("risk", {})
+            verdict = FilterVerdict(rv.get("passed", True), rv.get("reasons", []), rv.get("checked", 0))
+            action = advise(rug_verdict=verdict, attention=t.get("attention")).action
         rows.append({
-            "attention": t.get("attention"),
-            "tradeable": "✅" if t.get("tradeable") else "⛔",
-            "symbol": t.get("symbol"),
-            "liq$": f.get("liquidity_usd"),
-            "vol24$": f.get("volume_24h_usd"),
-            "age_h": f.get("age_hours"),
-            "flags": "; ".join(t.get("risk", {}).get("reasons", [])[:2]) or "-",
-            "RugCheck": lk.get("rugcheck"), "GMGN": lk.get("gmgn"), "Axiom": lk.get("axiom"),
+            "att": t.get("attention"),
+            "verdict": ("✅ tradeable" if t.get("tradeable") else "⛔ avoid"),
+            "advice": action,
+            "symbol": t.get("symbol"), "chain": t.get("chain"),
+            "price$": f.get("price_usd"), "24h%": f.get("price_change_24h"),
+            "liq$": f.get("liquidity_usd"), "vol24$": f.get("volume_24h_usd"),
+            "mcap$": f.get("market_cap") or f.get("fdv"), "age_h": f.get("age_hours"),
+            "X/Twitter": lk.get("x_search"), "Axiom": lk.get("axiom"),
+            "RugCheck": lk.get("rugcheck"), "GMGN": lk.get("gmgn"), "Dex": lk.get("dexscreener"),
         })
     df = pd.DataFrame(rows)
-    st.dataframe(df, use_container_width=True, column_config={
+    st.dataframe(df, use_container_width=True, hide_index=True, column_config={
+        "X/Twitter": st.column_config.LinkColumn("X/Twitter", display_text="live feed"),
+        "Axiom": st.column_config.LinkColumn("Axiom", display_text="observe"),
         "RugCheck": st.column_config.LinkColumn("RugCheck", display_text="check"),
         "GMGN": st.column_config.LinkColumn("GMGN", display_text="open"),
-        "Axiom": st.column_config.LinkColumn("Axiom", display_text="observe"),
+        "Dex": st.column_config.LinkColumn("Dex", display_text="chart"),
+        "price$": st.column_config.NumberColumn(format="$%.8f"),
+        "24h%": st.column_config.NumberColumn(format="%.1f%%"),
         "liq$": st.column_config.NumberColumn(format="$%d"),
         "vol24$": st.column_config.NumberColumn(format="$%d"),
+        "mcap$": st.column_config.NumberColumn(format="$%d"),
     })
     n_ok = sum(1 for t in tokens if t.get("tradeable"))
-    st.caption(f"{len(tokens)} tokens scanned · {n_ok} passed the rug filters. "
-               "Most trending tokens fail — that is the honest reality, not a bug.")
+    st.caption(f"{len(tokens)} coins · {n_ok} passed the rug filters. Most trending coins "
+               "fail — that is the honest reality, not a bug.")
+
+    st.markdown("#### Per-coin detail")
+    pick = st.selectbox("Coin", [f"{t.get('symbol')} ({t.get('chain')})" for t in tokens])
+    tok = tokens[[f"{t.get('symbol')} ({t.get('chain')})" for t in tokens].index(pick)]
+    f, lk = tok.get("features", {}), tok.get("links", {})
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Attention", f"{tok.get('attention')}/100")
+    c2.metric("24h change", f"{f.get('price_change_24h', 0):+.1f}%")
+    c3.metric("Verdict", "tradeable" if tok.get("tradeable") else "avoid")
+    st.write("**Risk flags:** " + ("; ".join(tok.get("risk", {}).get("reasons", [])) or "none known"))
+    st.write("**Data:**", {k: f.get(k) for k in
+             ["price_usd", "liquidity_usd", "volume_24h_usd", "market_cap", "fdv",
+              "price_change_1h", "price_change_6h", "price_change_24h", "age_hours",
+              "buys_5m", "sells_5m", "boosts", "dex"] if k in f})
+    st.markdown("**Links:** " + " · ".join(
+        f"[{name}]({url})" for name, url in lk.items() if url))
+    st.caption("Attention/verdict describe the present, not the future. Verify on the live "
+               "X feed + RugCheck before ever risking real money. Paper only here.")
 
 
 def tab_observe() -> None:
@@ -341,12 +380,12 @@ def main() -> None:
                 "(`ci-tick` for CEX, `dex-bot`/config_dex for on-chain) first.")
     db = Database(db_path) if os.path.exists(db_path) else None
 
-    tabs = st.tabs(["📈 Live", "🔎 Signals", "👁 Observe", "🏆 Ranking",
+    tabs = st.tabs(["📈 Live", "🔎 Discover", "👁 Observe", "🏆 Ranking",
                     "🔬 Detail", "🗺 Heatmap", "📜 Audit"])
     with tabs[0]:
         tab_live(db) if db else st.caption("No data yet.")
     with tabs[1]:
-        tab_signals()
+        tab_discover()
     with tabs[2]:
         tab_observe()
     with tabs[3]:

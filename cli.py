@@ -402,15 +402,17 @@ def cmd_scan(args) -> int:
     from data.memecoin_filters import (FilterConfig, fetch_goplus_solana,
                                         fetch_rugcheck, merge_metadata)
     from data.signals import build_watchlist, fetch_dexscreener_boosted
-    print(f"\nScanning boosted {args.chain} tokens (attention + rug filters)... "
+    print(f"\nScanning boosted [{args.chains}] tokens (attention + rug filters)... "
           "(real data; best-effort)\n")
-    feats = fetch_dexscreener_boosted(args.chain, limit=args.limit)
+    feats = fetch_dexscreener_boosted(args.chains, limit=args.limit)
     if not feats:
         print("No live token data returned (network/rate-limit). Nothing faked.")
         return 1
     metas = {}
-    if not args.no_rugcheck and args.chain == "solana":
+    if not args.no_rugcheck:
         for f in feats:
+            if f.chain != "solana":     # RugCheck is Solana-only; other chains keep DexScreener data
+                continue
             rc = fetch_rugcheck(f.mint)
             gp = fetch_goplus_solana(f.mint) if args.goplus else None
             metas[f.mint] = merge_metadata(rc, gp)
@@ -583,7 +585,7 @@ def build_parser() -> argparse.ArgumentParser:
     op.set_defaults(func=cmd_optimize)
 
     sc = sub.add_parser("scan", help="scan active on-chain memecoins (attention + rug filters)")
-    sc.add_argument("--chain", default="solana")
+    sc.add_argument("--chains", default="sol", help="comma list: sol,bnb,eth,base")
     sc.add_argument("--limit", type=int, default=25)
     sc.add_argument("--tradeable-only", action="store_true", help="only tokens passing rug filters")
     sc.add_argument("--no-rugcheck", action="store_true", help="skip RugCheck (faster, fewer checks)")

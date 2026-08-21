@@ -37,6 +37,13 @@ class TokenFeatures:
     age_hours: float = 0.0
     pair_url: str = ""
     pool_address: str = ""      # AMM pool address (for on-chain OHLCV via GeckoTerminal)
+    price_usd: float = 0.0
+    price_change_24h: float = 0.0
+    price_change_6h: float = 0.0
+    fdv: float = 0.0
+    market_cap: float = 0.0
+    dex: str = ""
+    socials: dict = field(default_factory=dict)   # {twitter,telegram,website}
 
 
 @dataclass
@@ -85,14 +92,35 @@ def attention_score(f: TokenFeatures) -> float:
     return round(max(0.0, min(100.0, score)), 1)
 
 
-def token_links(mint: str, chain: str = "solana", pair_url: str = "") -> Dict[str, str]:
-    return {
+def _x_search(symbol: str, mint: str) -> str:
+    """Link to the LIVE X/Twitter feed for the coin (honest alternative to a
+    paid sentiment API): cashtag search when the symbol is clean, else mint."""
+    import urllib.parse as _u
+    if symbol and symbol.replace("_", "").isalnum() and len(symbol) <= 12:
+        q = f"${symbol}"
+    else:
+        q = mint
+    return "https://x.com/search?q=" + _u.quote(q) + "&f=live"
+
+
+def token_links(mint: str, chain: str = "solana", pair_url: str = "",
+                symbol: str = "", socials: Optional[dict] = None) -> Dict[str, str]:
+    socials = socials or {}
+    links = {
         "dexscreener": pair_url or f"https://dexscreener.com/{chain}/{mint}",
         "rugcheck": f"https://rugcheck.xyz/tokens/{mint}",
         "gmgn": f"https://gmgn.ai/{'sol' if chain == 'solana' else chain}/token/{mint}",
         "axiom": f"https://axiom.trade/t/{mint}",       # OBSERVE only (Axiom is a live venue)
         "birdeye": f"https://birdeye.so/token/{mint}?chain={chain}",
+        "x_search": _x_search(symbol, mint),            # LIVE Twitter/X feed for the coin
     }
+    if socials.get("twitter"):
+        links["x_official"] = socials["twitter"]
+    if socials.get("telegram"):
+        links["telegram"] = socials["telegram"]
+    if socials.get("website"):
+        links["website"] = socials["website"]
+    return links
 
 
 def build_signal(f: TokenFeatures, meta: Optional[TokenMetadata],
@@ -112,10 +140,12 @@ def build_signal(f: TokenFeatures, meta: Optional[TokenMetadata],
         attention=attention_score(f), tradeable=verdict.passed, risk=verdict,
         features={"liquidity_usd": f.liquidity_usd, "volume_24h_usd": f.volume_24h_usd,
                   "volume_5m_usd": f.volume_5m_usd, "price_change_1h": f.price_change_1h,
+                  "price_change_6h": f.price_change_6h, "price_change_24h": f.price_change_24h,
+                  "price_usd": f.price_usd, "fdv": f.fdv, "market_cap": f.market_cap,
                   "buys_5m": f.buys_5m, "sells_5m": f.sells_5m, "boosts": f.boosts,
                   "has_socials": f.has_socials, "age_hours": round(f.age_hours, 1),
-                  "pool_address": f.pool_address},
-        links=token_links(f.mint, f.chain, f.pair_url))
+                  "dex": f.dex, "pool_address": f.pool_address},
+        links=token_links(f.mint, f.chain, f.pair_url, f.symbol, f.socials))
 
 
 def build_watchlist(features: List[TokenFeatures], metas: Dict[str, Optional[TokenMetadata]],
@@ -139,12 +169,29 @@ def _get_json(url: str, timeout: float = 15.0):
     return r.json()
 
 
+def _extract_socials(info: dict) -> dict:
+    out = {}
+    for s in (info.get("socials") or []):
+        t = (s.get("type") or "").lower()
+        if t in ("twitter", "x") and s.get("url"):
+            out["twitter"] = s["url"]
+        elif t == "telegram" and s.get("url"):
+            out["telegram"] = s["url"]
+    sites = info.get("websites") or []
+    if sites:
+        first = sites[0]
+        out["website"] = first.get("url") if isinstance(first, dict) else first
+    return out
+
+
 def _features_from_pair(p: dict) -> Optional[TokenFeatures]:
     try:
         base = p.get("baseToken") or {}
         vol = p.get("volume") or {}
+        pc = p.get("priceChange") or {}
         txns = p.get("txns") or {}
         m5 = txns.get("m5") or {}
+        info = p.get("info") or {}
         created = p.get("pairCreatedAt")
         age_h = 0.0
         if created:
@@ -156,35 +203,54 @@ def _features_from_pair(p: dict) -> Optional[TokenFeatures]:
             liquidity_usd=float((p.get("liquidity") or {}).get("usd") or 0.0),
             volume_24h_usd=float(vol.get("h24") or 0.0),
             volume_5m_usd=float(vol.get("m5") or 0.0),
-            price_change_1h=float((p.get("priceChange") or {}).get("h1") or 0.0),
+            price_change_1h=float(pc.get("h1") or 0.0),
+            price_change_6h=float(pc.get("h6") or 0.0),
+            price_change_24h=float(pc.get("h24") or 0.0),
+            price_usd=float(p.get("priceUsd") or 0.0),
+            fdv=float(p.get("fdv") or 0.0),
+            market_cap=float(p.get("marketCap") or 0.0),
+            dex=p.get("dexId") or "",
             buys_5m=int(m5.get("buys") or 0), sells_5m=int(m5.get("sells") or 0),
             boosts=int((p.get("boosts") or {}).get("active") or 0),
-            has_socials=bool((p.get("info") or {}).get("socials")),
+            has_socials=bool(info.get("socials")),
+            socials=_extract_socials(info),
             age_hours=age_h, pair_url=p.get("url") or "",
             pool_address=p.get("pairAddress") or "")
     except Exception:
         return None
 
 
-def fetch_dexscreener_boosted(chain: str = "solana", limit: int = 30) -> List[TokenFeatures]:
-    """Latest *boosted* tokens, enriched with pair stats. Best-effort."""
+# Short chain aliases -> DexScreener chainIds.
+CHAIN_ALIASES = {"sol": "solana", "solana": "solana", "bnb": "bsc", "bsc": "bsc",
+                 "eth": "ethereum", "ethereum": "ethereum", "base": "base"}
+
+
+def _norm_chains(chains) -> set:
+    if isinstance(chains, str):
+        chains = [c.strip() for c in chains.split(",") if c.strip()]
+    return {CHAIN_ALIASES.get(c.lower(), c.lower()) for c in chains}
+
+
+def fetch_dexscreener_boosted(chains="solana", limit: int = 30) -> List[TokenFeatures]:
+    """Latest *boosted* tokens across one or more chains, enriched with pair
+    stats. ``chains`` may be a comma string or list ("sol,bnb,eth"). Best-effort."""
     try:
+        wanted = _norm_chains(chains)
         boosts = _get_json("https://api.dexscreener.com/token-boosts/latest/v1") or []
-        mints = []
-        for b in boosts:
-            if (b.get("chainId") or "").lower() == chain and b.get("tokenAddress"):
-                mints.append(b["tokenAddress"])
         seen = set()
-        deduped = []
-        for m in mints:
-            if m not in seen:
-                seen.add(m)
-                deduped.append(m)
-        mints = deduped[:limit]
+        picks = []  # (chainId, mint)
+        for b in boosts:
+            cid = (b.get("chainId") or "").lower()
+            addr = b.get("tokenAddress")
+            if cid in wanted and addr and (cid, addr) not in seen:
+                seen.add((cid, addr))
+                picks.append((cid, addr))
+        picks = picks[:limit]
         out: List[TokenFeatures] = []
-        for mint in mints:
+        for cid, mint in picks:
             data = _get_json(f"https://api.dexscreener.com/latest/dex/tokens/{mint}")
-            pairs = (data or {}).get("pairs") or []
+            allp = (data or {}).get("pairs") or []
+            pairs = [p for p in allp if (p.get("chainId") or "").lower() == cid] or allp
             if not pairs:
                 continue
             pairs.sort(key=lambda p: (p.get("liquidity") or {}).get("usd", 0) or 0, reverse=True)
