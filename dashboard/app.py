@@ -81,6 +81,8 @@ def tab_live(db_path: str, auto: bool = False, secs: int = 15) -> None:
         finally:
             db.close()
     _render()
+    # Heavy per-coin charts render outside the auto-refresh fragment (network).
+    _render_all_charts(db_path)
 
 
 def _render_live(db: Database) -> None:
@@ -172,49 +174,138 @@ def _render_live(db: Database) -> None:
                      else pd.DataFrame(columns=["strategy", "symbol", "pnl"]),
                      use_container_width=True)
 
-    _candles_with_markers(db, positions, trades)
+
+@st.cache_data(ttl=120, show_spinner=False)
+def _load_candles(symbol: str, timeframe: str, days: int):
+    """Fetch real candles for a symbol (ccxt for CEX, GeckoTerminal for on-chain).
+    Cached briefly so the charts don't hammer the APIs."""
+    from core.utils import closed_bars
+    if ":" in symbol:
+        from data.dex_source import DexSource
+        src = DexSource()
+    else:
+        from data.ccxt_source import CcxtSource
+        src = CcxtSource("binance")
+    raw = src.fetch_ohlcv(symbol, timeframe, days)
+    df = closed_bars(raw, timeframe).tail(400).copy()
+    df["time"] = pd.to_datetime(df["timestamp"], unit="ms")
+    return df
 
 
-def _candles_with_markers(db: Database, positions, trades) -> None:
-    st.markdown("#### Candle chart with trade markers")
+def _twitter_link(symbol: str) -> str:
+    import urllib.parse as u
+    base = symbol.split("/")[0]
+    if ":" not in symbol and base.isalnum():
+        return "https://x.com/search?q=" + u.quote("$" + base) + "&f=live"
+    return "https://x.com/search?q=" + u.quote(symbol) + "&f=live"
+
+
+def _coin_chart(symbol: str, timeframe: str, days: int, trades, position) -> None:
+    import altair as alt
     try:
-        import altair as alt
-        from config.settings import Settings
-        from core.utils import closed_bars
-        from data.factory import build_data_source
+        df = _load_candles(symbol, timeframe, days)
+        if df is None or len(df) < 3:
+            st.caption(f"{symbol}: no candles.")
+            return
     except Exception as e:
-        st.caption(f"Candle chart unavailable: {e}")
+        st.caption(f"{symbol}: could not load candles ({e}).")
         return
-    symbols = sorted({t["symbol"] for t in trades} | {p["symbol"] for p in positions})
-    if not symbols:
-        st.caption("No symbol activity yet.")
-        return
-    sym = st.selectbox("Symbol", symbols)
-    try:
-        s = Settings.load()
-        data = build_data_source(s)
-        raw = data.fetch_ohlcv(sym, s.get("data.timeframe", "1h"), 30)
-        df = closed_bars(raw, s.get("data.timeframe", "1h")).tail(300).copy()
-        df["time"] = pd.to_datetime(df["timestamp"], unit="ms")
-    except Exception as e:
-        st.caption(f"Could not load candles for {sym}: {e}")
-        return
+
     base = alt.Chart(df).encode(x=alt.X("time:T", title=None))
-    rule = base.mark_rule().encode(y=alt.Y("low:Q", scale=alt.Scale(zero=False)), y2="high:Q")
-    bar = base.mark_bar().encode(
+    wick = base.mark_rule().encode(y=alt.Y("low:Q", title="Kurs", scale=alt.Scale(zero=False)),
+                                   y2="high:Q",
+                                   color=alt.condition("datum.close >= datum.open",
+                                                       alt.value("#2ca02c"), alt.value("#d62728")))
+    body = base.mark_bar(size=3).encode(
         y="open:Q", y2="close:Q",
         color=alt.condition("datum.close >= datum.open", alt.value("#2ca02c"), alt.value("#d62728")))
-    layers = [rule, bar]
-    sym_trades = [t for t in trades if t["symbol"] == sym and t.get("ts_close")]
-    if sym_trades:
-        tm = pd.DataFrame(sym_trades)
-        tm["time"] = pd.to_datetime(tm["ts_close"], unit="ms")
-        markers = alt.Chart(tm).mark_point(size=90, filled=True).encode(
-            x="time:T", y="exit:Q",
+    layers = [wick, body]
+
+    # Entry (buy) and exit (sell) markers from this symbol's trades.
+    st_trades = [t for t in trades if t["symbol"] == symbol]
+    entries = [{"time": pd.to_datetime(t["ts_open"], unit="ms"), "price": t["entry"],
+                "strat": t["strategy"]} for t in st_trades if t.get("ts_open")]
+    exits = [{"time": pd.to_datetime(t["ts_close"], unit="ms"), "price": t["exit"],
+              "pnl": t["pnl"], "reason": t["reason"]} for t in st_trades if t.get("ts_close")]
+    if entries:
+        em = alt.Chart(pd.DataFrame(entries)).mark_point(
+            shape="triangle-up", size=140, filled=True, color="#33d17a").encode(
+            x="time:T", y="price:Q", tooltip=["strat", "price"])
+        layers.append(em)
+    if exits:
+        xm = alt.Chart(pd.DataFrame(exits)).mark_point(
+            shape="triangle-down", size=140, filled=True).encode(
+            x="time:T", y="price:Q",
             color=alt.condition("datum.pnl >= 0", alt.value("#2ca02c"), alt.value("#d62728")),
-            tooltip=["strategy", "symbol", "pnl", "r_multiple", "reason"])
-        layers.append(markers)
-    st.altair_chart(alt.layer(*layers).interactive(), use_container_width=True)
+            tooltip=["price", "pnl", "reason"])
+        layers.append(xm)
+
+    # Open-position lines: entry (blue), stop (red dashed), take-profit (green dashed).
+    if position:
+        def _hline(val, color, dash):
+            return alt.Chart(pd.DataFrame({"y": [val]})).mark_rule(
+                color=color, strokeDash=dash, size=1.5).encode(y="y:Q")
+        layers.append(_hline(position["entry"], "#4c8dff", [1, 0]))
+        layers.append(_hline(position["stop"], "#ff6b6b", [5, 4]))
+        if position.get("tp") is not None:
+            layers.append(_hline(position["tp"], "#33d17a", [5, 4]))
+
+    st.altair_chart(alt.layer(*layers).resolve_scale(y="shared").interactive(),
+                    use_container_width=True)
+
+
+def _render_all_charts(db_path: str) -> None:
+    st.markdown("### Charts — Ein-/Ausstieg, Stop-Loss & Take-Profit pro Coin")
+    st.caption("🟢 Kauf-Einstieg · 🔻 Verkauf · blaue Linie = Entry · rote gestrichelte = Stop-Loss · "
+               "grüne gestrichelte = Take-Profit. Kerzen = echter Kurs.")
+    try:
+        import altair  # noqa: F401
+    except Exception as e:
+        st.caption(f"Charts brauchen altair: {e}")
+        return
+    db = Database(db_path)
+    try:
+        positions = db.load_positions()
+        trades = db.recent_trades(1000)
+    finally:
+        db.close()
+
+    pos_by_sym = {p["symbol"]: p for p in positions}
+    traded = sorted({t["symbol"] for t in trades})
+    all_syms = sorted(set(pos_by_sym) | set(traded))
+    if not all_syms:
+        st.caption("Noch keine Trades/Positionen — sobald der Bot handelt, erscheinen hier die Charts.")
+        return
+
+    c1, c2, c3 = st.columns([1, 1, 2])
+    tf = c1.selectbox("Timeframe", ["5m", "15m", "1h", "1m"], index=0)
+    days = c2.slider("Tage", 1, 30, 3)
+    default = [s for s in all_syms if s in pos_by_sym] or all_syms[:4]
+    chosen = c3.multiselect("Coins", all_syms, default=default)
+    if c1.button("🔄 Charts aktualisieren"):
+        _load_candles.clear()
+
+    for sym in chosen:
+        pos = pos_by_sym.get(sym)
+        held = " · 🟢 offen" if pos else ""
+        st.markdown(f"#### {sym}{held}")
+        # Twitter + wallet/verify links per coin.
+        base = sym.split('/')[0]
+        links = [f"[𝕏 Twitter (live)]({_twitter_link(sym)})",
+                 f"[GMGN smart-money](https://gmgn.ai/?chain=sol&q={base})",
+                 f"[DexScreener](https://dexscreener.com/search?q={base})"]
+        if ":" in sym:
+            mint = sym.split(":", 1)[1]
+            links = [f"[𝕏 Twitter (live)]({_twitter_link(sym)})",
+                     f"[RugCheck](https://rugcheck.xyz/tokens/{mint})",
+                     f"[GMGN Radar](https://gmgn.ai/sol/token/{mint})",
+                     f"[Axiom](https://axiom.trade/t/{mint})"]
+        st.markdown(" · ".join(links))
+        if pos:
+            st.caption(f"Entry {pos['entry']:.6g} · Stop {pos['stop']:.6g}"
+                       + (f" · TP {pos['tp']:.6g}" if pos.get("tp") is not None else "")
+                       + f" · Menge {pos['qty']:.4g}")
+        _coin_chart(sym, tf, days, trades, pos)
 
 
 _DISCOVER_CSS = """

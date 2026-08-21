@@ -30,7 +30,7 @@ data:
     enabled: false
 
 engine:
-  initial_equity: 10000.0
+  initial_equity: 200.0        # a real 200-unit virtual bankroll on real memecoins
   fee_rate: 0.001              # realistic taker fee (per side)
   slippage_rate: 0.0015        # realistic slippage (per side)
   risk_per_trade: 0.01         # 1% — never loosened
