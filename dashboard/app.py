@@ -4,15 +4,16 @@ Run locally:   streamlit run dashboard/app.py
 Cloud (public, read-only):  set CLOUD_READONLY=1 and TRADING_DB=cloud/paper.db
 
 Everything shown is SIMULATED. Live trading is locked. Memecoins are extremely
-risky and mostly go to zero — nothing here is a prediction or advice.
+risky and mostly go to zero — nothing here is a prediction or advice. The
+"Signals" tab ranks current ATTENTION, never a forecast.
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
 import time
 
-# Make the project importable when Streamlit runs this file directly.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pandas as pd  # noqa: E402
@@ -22,6 +23,26 @@ from persistence.db import Database  # noqa: E402
 
 READONLY = os.environ.get("CLOUD_READONLY", "0") == "1"
 DB_PATH = os.environ.get("TRADING_DB", os.path.join("cloud", "paper.db"))
+WATCHLIST_PATH = os.environ.get("WATCHLIST", "watchlist.yaml")
+
+_CSS = """
+<style>
+:root { --card:#12151c; --line:#262b36; --muted:#8b93a7; }
+.block-container { padding-top: 1.2rem; max-width: 1300px; }
+div[data-testid="stMetric"] {
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  padding: 14px 16px;
+}
+div[data-testid="stMetricLabel"] { color: var(--muted); }
+.badge { display:inline-block; padding:2px 10px; border-radius:999px; font-size:.8rem;
+  font-weight:600; }
+.badge.green { background:#123d24; color:#5ee08a; }
+.badge.red   { background:#3d1414; color:#ff8a8a; }
+.badge.amber { background:#3d3212; color:#f2c14e; }
+.small { color: var(--muted); font-size:.85rem; }
+a { text-decoration: none; }
+</style>
+"""
 
 
 def _db() -> Database:
@@ -31,77 +52,97 @@ def _db() -> Database:
 def _banners() -> None:
     st.warning("**PAPER TRADING — SIMULATED MONEY ONLY.** Live trading is locked "
                "(`LiveTradingNotEnabled`). No real orders are ever placed.")
-    st.error("**MEMECOIN RISK:** memecoins are extremely risky — most trend to zero, "
-             "rugpulls are common, liquidity is thin and slippage is high. Short-term "
-             "positive results are usually noise. This is not investment advice.")
+    st.error("**MEMECOIN RISK:** most memecoins go to zero; rugpulls are common, liquidity "
+             "is thin, slippage is high. A positive short-term result is usually noise. "
+             "Not investment advice, not a prediction.")
 
 
-def _kill_switch_controls(db: Database) -> None:
-    if READONLY:
-        st.info("Read-only cloud view — control buttons are hidden.")
-        return
-    c1, c2, c3, c4 = st.columns(4)
-    if c1.button("⏸ Stop (safe)"):
-        db.set_control("command", "stop"); st.success("Stop requested.")
-    if c2.button("▶ Run"):
-        db.set_control("command", "run"); st.success("Run requested.")
-    if c3.button("Reset daily breaker"):
-        db.set_control("reset_breaker", "1"); st.success("Breaker reset requested.")
-    if c4.button("Clear kill switch"):
-        db.set_control("kill_tripped", "0"); st.success("Kill switch cleared.")
+def _pill(text: str, kind: str) -> str:
+    return f'<span class="badge {kind}">{text}</span>'
 
 
+# --------------------------------------------------------------------------
 def tab_live(db: Database) -> None:
-    st.subheader("Live Paper-Trader")
     row = db.conn.execute("SELECT * FROM heartbeat WHERE id=1").fetchone()
     hb = dict(row) if row else {}
     eq = db.last_equity()
     positions = db.load_positions()
+    trades = db.recent_trades(500)
 
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Status", hb.get("status", "unknown"))
-    m2.metric("Equity (sim)", f"{eq:,.2f}" if eq is not None else "-")
-    m3.metric("Open positions", len(positions))
+    status = hb.get("status", "unknown")
+    kind = "green" if status == "running" else ("amber" if status == "safe_hold" else "red")
+    st.markdown(f"### Live Paper-Trader &nbsp; {_pill(status, kind)}", unsafe_allow_html=True)
+
+    # KPIs
+    init_eq = 10000.0
+    wins = [t for t in trades if t["pnl"] > 0]
+    wr = (len(wins) / len(trades) * 100.0) if trades else 0.0
+    m1, m2, m3, m4, m5 = st.columns(5)
+    m1.metric("Equity (sim)", f"{eq:,.0f}" if eq is not None else "-",
+              f"{(eq/init_eq-1)*100:+.2f}%" if eq else None)
+    m2.metric("Open positions", len(positions))
+    m3.metric("Closed trades", len(trades))
+    m4.metric("Win rate", f"{wr:.0f}%")
     age = (time.time() * 1000 - hb["ts"]) / 1000 if hb.get("ts") else None
-    m4.metric("Heartbeat age", f"{age:.0f}s" if age is not None else "-")
+    m5.metric("Heartbeat age", f"{age:.0f}s" if age is not None else "-")
 
-    _kill_switch_controls(db)
+    if not READONLY:
+        c1, c2, c3, c4 = st.columns(4)
+        if c1.button("⏸ Stop (safe)"):
+            db.set_control("command", "stop"); st.success("Stop requested.")
+        if c2.button("▶ Run"):
+            db.set_control("command", "run"); st.success("Run requested.")
+        if c3.button("Reset daily breaker"):
+            db.set_control("reset_breaker", "1"); st.success("Breaker reset requested.")
+        if c4.button("Clear kill switch"):
+            db.set_control("kill_tripped", "0"); st.success("Kill switch cleared.")
+    else:
+        st.caption("Read-only cloud view — control buttons are hidden.")
 
-    st.markdown("**Equity curve (simulated)**")
+    st.markdown("#### Equity curve (simulated)")
     curve = db.equity_curve(5000)
     if curve:
         ec = pd.DataFrame(curve, columns=["ts", "equity"])
         ec["time"] = pd.to_datetime(ec["ts"], unit="ms")
-        st.line_chart(ec.set_index("time")["equity"])
+        try:
+            import altair as alt
+            area = alt.Chart(ec).mark_area(opacity=0.25, line=True).encode(
+                x=alt.X("time:T", title=None), y=alt.Y("equity:Q", scale=alt.Scale(zero=False)))
+            st.altair_chart(area.interactive(), use_container_width=True)
+        except Exception:
+            st.line_chart(ec.set_index("time")["equity"])
     else:
-        st.caption("No equity points yet.")
+        st.caption("No equity points yet. Run `python cli.py ci-tick`.")
 
-    st.markdown("**Open positions**")
-    st.dataframe(pd.DataFrame(positions) if positions else pd.DataFrame(columns=["strategy", "symbol"]))
+    cA, cB = st.columns(2)
+    with cA:
+        st.markdown("#### Open positions")
+        st.dataframe(pd.DataFrame(positions) if positions
+                     else pd.DataFrame(columns=["strategy", "symbol"]), use_container_width=True)
+    with cB:
+        st.markdown("#### Recent trades (simulated)")
+        st.dataframe(pd.DataFrame(trades[:20]) if trades
+                     else pd.DataFrame(columns=["strategy", "symbol", "pnl"]),
+                     use_container_width=True)
 
-    st.markdown("**Activity feed (recent audit)**")
-    st.dataframe(pd.DataFrame(db.recent_audit(50)))
-
-    # Candle chart with buy/sell markers for a chosen symbol (best-effort, uses Altair).
-    _candles_with_markers(db, positions)
+    _candles_with_markers(db, positions, trades)
 
 
-def _candles_with_markers(db: Database, positions) -> None:
+def _candles_with_markers(db: Database, positions, trades) -> None:
+    st.markdown("#### Candle chart with trade markers")
     try:
         import altair as alt
         from config.settings import Settings
         from core.utils import closed_bars
         from data.factory import build_data_source
-    except Exception as e:  # pragma: no cover
+    except Exception as e:
         st.caption(f"Candle chart unavailable: {e}")
         return
-
-    trades = db.recent_trades(200)
     symbols = sorted({t["symbol"] for t in trades} | {p["symbol"] for p in positions})
     if not symbols:
-        st.caption("No symbol activity yet for a candle chart.")
+        st.caption("No symbol activity yet.")
         return
-    sym = st.selectbox("Candle chart symbol", symbols)
+    sym = st.selectbox("Symbol", symbols)
     try:
         s = Settings.load()
         data = build_data_source(s)
@@ -111,49 +152,109 @@ def _candles_with_markers(db: Database, positions) -> None:
     except Exception as e:
         st.caption(f"Could not load candles for {sym}: {e}")
         return
-
-    base = alt.Chart(df).encode(x="time:T")
-    rule = base.mark_rule().encode(y="low:Q", y2="high:Q")
+    base = alt.Chart(df).encode(x=alt.X("time:T", title=None))
+    rule = base.mark_rule().encode(y=alt.Y("low:Q", scale=alt.Scale(zero=False)), y2="high:Q")
     bar = base.mark_bar().encode(
         y="open:Q", y2="close:Q",
-        color=alt.condition("datum.close >= datum.open",
-                            alt.value("#2ca02c"), alt.value("#d62728")))
+        color=alt.condition("datum.close >= datum.open", alt.value("#2ca02c"), alt.value("#d62728")))
     layers = [rule, bar]
-
     sym_trades = [t for t in trades if t["symbol"] == sym and t.get("ts_close")]
     if sym_trades:
         tm = pd.DataFrame(sym_trades)
         tm["time"] = pd.to_datetime(tm["ts_close"], unit="ms")
-        buys = base  # entries approximated by exit markers here for simplicity
-        markers = alt.Chart(tm).mark_point(size=80, filled=True).encode(
+        markers = alt.Chart(tm).mark_point(size=90, filled=True).encode(
             x="time:T", y="exit:Q",
             color=alt.condition("datum.pnl >= 0", alt.value("#2ca02c"), alt.value("#d62728")),
             tooltip=["strategy", "symbol", "pnl", "r_multiple", "reason"])
         layers.append(markers)
-    st.altair_chart(alt.layer(*layers).interactive())
+    st.altair_chart(alt.layer(*layers).interactive(), use_container_width=True)
+
+
+def tab_signals() -> None:
+    st.markdown("### Signals & Watchlist")
+    st.info("**Attention ≠ prediction.** This ranks how much activity a token has "
+            "RIGHT NOW. By the time a coin trends, you are usually late. Every row links "
+            "out so you can verify on RugCheck / GMGN / Axiom before risking anything. "
+            "Refresh with `python cli.py scan`.")
+    if not os.path.exists(WATCHLIST_PATH):
+        st.caption(f"No `{WATCHLIST_PATH}` yet. Run `python cli.py scan` to generate it.")
+        return
+    try:
+        import yaml
+        data = yaml.safe_load(open(WATCHLIST_PATH, encoding="utf-8")) or {}
+    except Exception as e:
+        st.caption(f"Could not read watchlist: {e}")
+        return
+    tokens = data.get("tokens", [])
+    if not tokens:
+        st.caption("Watchlist is empty.")
+        return
+    rows = []
+    for t in tokens:
+        f = t.get("features", {})
+        lk = t.get("links", {})
+        rows.append({
+            "attention": t.get("attention"),
+            "tradeable": "✅" if t.get("tradeable") else "⛔",
+            "symbol": t.get("symbol"),
+            "liq$": f.get("liquidity_usd"),
+            "vol24$": f.get("volume_24h_usd"),
+            "age_h": f.get("age_hours"),
+            "flags": "; ".join(t.get("risk", {}).get("reasons", [])[:2]) or "-",
+            "RugCheck": lk.get("rugcheck"), "GMGN": lk.get("gmgn"), "Axiom": lk.get("axiom"),
+        })
+    df = pd.DataFrame(rows)
+    st.dataframe(df, use_container_width=True, column_config={
+        "RugCheck": st.column_config.LinkColumn("RugCheck", display_text="check"),
+        "GMGN": st.column_config.LinkColumn("GMGN", display_text="open"),
+        "Axiom": st.column_config.LinkColumn("Axiom", display_text="observe"),
+        "liq$": st.column_config.NumberColumn(format="$%d"),
+        "vol24$": st.column_config.NumberColumn(format="$%d"),
+    })
+    n_ok = sum(1 for t in tokens if t.get("tradeable"))
+    st.caption(f"{len(tokens)} tokens scanned · {n_ok} passed the rug filters. "
+               "Most trending tokens fail — that is the honest reality, not a bug.")
+
+
+def tab_observe() -> None:
+    st.markdown("### Observe on Axiom / MockApe")
+    st.info("This bot is **paper-only** and never places real orders, so there is nothing "
+            "to route to a live venue. Here is the honest way to 'follow what the bot does' "
+            "and to practice as realistically as possible:")
+    st.markdown(
+        "- **Watch the same tokens on Axiom** — open any token from the *Signals* tab via its "
+        "`observe` link (`axiom.trade/t/<mint>`). Axiom shows live price, wallet activity and "
+        "X/Twitter sentiment for that token. You are *observing*, not letting the bot trade.\n"
+        "- **MockApe** (browser extension) adds **paper trading directly inside Axiom, Padre and "
+        "GMGN** with virtual money and real-time data — the closest-to-real practice without "
+        "risking funds. Use it to manually mirror the bot's paper decisions on Axiom's UI.\n"
+        "- **Track smart-money wallets** on **GMGN** (free leaderboards / Radar: earliest, "
+        "heaviest and most-profitable buyers) or **Cielo/Nansen** (paid) — use the `GMGN` link "
+        "per token.\n"
+        "- **Verify safety** on **RugCheck** (mint/freeze authority, LP lock, holder "
+        "concentration, insiders) via the `RugCheck` link before you ever risk real money.")
+    st.warning("Going from paper to real money is a decision only you can make and own. The "
+               "research is blunt: most memecoin traders lose, and 'attention' is not an edge.")
 
 
 def tab_ranking(db: Database) -> None:
-    st.subheader("Ranking (latest evaluations)")
+    st.markdown("### Strategy ranking (latest evaluations)")
     evals = db.latest_evaluations(500)
     if not evals:
         st.caption("No evaluations yet. Run `python cli.py rank --db`.")
         return
-    df = pd.DataFrame(evals)
-    # Keep the newest row per (strategy, symbol).
-    df = df.sort_values("id").drop_duplicates(["strategy", "symbol"], keep="last")
+    df = pd.DataFrame(evals).sort_values("id").drop_duplicates(["strategy", "symbol"], keep="last")
     df = df.sort_values("score", ascending=False)
     st.dataframe(df[["light", "score", "strategy", "symbol", "expectancy_r",
-                     "n_trades", "mean_efficiency", "ruin_prob"]])
+                     "n_trades", "mean_efficiency", "ruin_prob"]], use_container_width=True)
 
 
 def tab_detail(db: Database) -> None:
-    st.subheader("Detail (score decomposition)")
+    st.markdown("### Detail (score decomposition)")
     evals = db.latest_evaluations(500)
     if not evals:
         st.caption("No evaluations yet.")
         return
-    import json
     df = pd.DataFrame(evals).sort_values("id").drop_duplicates(["strategy", "symbol"], keep="last")
     label = st.selectbox("Combo", [f"{r.strategy}@{r.symbol}" for r in df.itertuples()])
     strat, sym = label.split("@")
@@ -165,23 +266,10 @@ def tab_detail(db: Database) -> None:
     for w in extra.get("warnings", []):
         st.write(f"- {w}")
     st.write("**Params (validated)**", extra.get("params", {}))
-    st.json({k: v for k, v in extra.items() if k not in ("subscores", "warnings", "params")})
-
-
-def tab_portfolio(db: Database) -> None:
-    st.subheader("Portfolio")
-    st.caption("Diversification lowers drawdown and smooths equity; it does not create "
-               "winners. If the combos have no edge, the portfolio has no edge.")
-    evals = db.latest_evaluations(500)
-    if not evals:
-        st.caption("No evaluations yet.")
-        return
-    df = pd.DataFrame(evals).sort_values("id").drop_duplicates(["strategy", "symbol"], keep="last")
-    st.dataframe(df[["light", "score", "strategy", "symbol"]].sort_values("score", ascending=False))
 
 
 def tab_heatmap(db: Database) -> None:
-    st.subheader("Heatmap (score by strategy x symbol)")
+    st.markdown("### Heatmap (score by strategy × symbol)")
     evals = db.latest_evaluations(1000)
     if not evals:
         st.caption("No evaluations yet.")
@@ -189,48 +277,51 @@ def tab_heatmap(db: Database) -> None:
     df = pd.DataFrame(evals).sort_values("id").drop_duplicates(["strategy", "symbol"], keep="last")
     pivot = df.pivot_table(index="strategy", columns="symbol", values="score", aggfunc="last")
 
-    # Colour cells ourselves (red->yellow->green) so we do NOT pull in matplotlib,
-    # which Styler.background_gradient would otherwise force as a dependency.
     def _color(v):
-        if v != v:  # NaN
+        if v != v:
             return ""
         v = max(0.0, min(100.0, float(v)))
         if v < 50:
             r, g = 220, int(60 + (v / 50.0) * 160)
         else:
             r, g = int(220 - ((v - 50) / 50.0) * 180), 200
-        return f"background-color: rgb({r},{g},60); color: #111"
+        return f"background-color: rgb({r},{g},60); color:#111"
 
-    st.dataframe(pivot.style.applymap(_color).format("{:.0f}"))
+    st.dataframe(pivot.style.applymap(_color).format("{:.0f}"), use_container_width=True)
 
 
 def tab_audit(db: Database) -> None:
-    st.subheader("Audit log")
-    st.dataframe(pd.DataFrame(db.recent_audit(300)))
+    st.markdown("### Audit log")
+    st.dataframe(pd.DataFrame(db.recent_audit(300)), use_container_width=True)
 
 
 def main() -> None:
-    st.set_page_config(page_title="Memecoin Paper Trader", layout="wide")
-    st.title("Memecoin Paper-Trading Analysis")
+    st.set_page_config(page_title="Memecoin Paper Trader", layout="wide", page_icon="🎲")
+    st.markdown(_CSS, unsafe_allow_html=True)
+    st.title("🎲 Memecoin Paper-Trading Analysis")
     _banners()
     if not os.path.exists(DB_PATH):
-        st.info(f"No database yet at `{DB_PATH}`. Run `python cli.py ci-tick` or `serve` first.")
-        return
-    db = _db()
-    tabs = st.tabs(["Live", "Ranking", "Detail", "Portfolio", "Heatmap", "Audit"])
+        st.info(f"No database yet at `{DB_PATH}`. Run `python cli.py ci-tick` first.")
+    db = _db() if os.path.exists(DB_PATH) else None
+
+    tabs = st.tabs(["📈 Live", "🔎 Signals", "👁 Observe", "🏆 Ranking",
+                    "🔬 Detail", "🗺 Heatmap", "📜 Audit"])
     with tabs[0]:
-        tab_live(db)
+        tab_live(db) if db else st.caption("No data yet.")
     with tabs[1]:
-        tab_ranking(db)
+        tab_signals()
     with tabs[2]:
-        tab_detail(db)
+        tab_observe()
     with tabs[3]:
-        tab_portfolio(db)
+        tab_ranking(db) if db else st.caption("No data yet.")
     with tabs[4]:
-        tab_heatmap(db)
+        tab_detail(db) if db else st.caption("No data yet.")
     with tabs[5]:
-        tab_audit(db)
-    db.close()
+        tab_heatmap(db) if db else st.caption("No data yet.")
+    with tabs[6]:
+        tab_audit(db) if db else st.caption("No data yet.")
+    if db:
+        db.close()
 
 
 if __name__ == "__main__":

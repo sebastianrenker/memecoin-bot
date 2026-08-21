@@ -78,6 +78,31 @@ pytest -q                                    # tests
 
 Windows users can just run `START.bat`.
 
+## On-chain signals & rug filters (new)
+
+```bash
+python cli.py scan --limit 25            # rank active on-chain memecoins by ATTENTION
+python cli.py scan --tradeable-only      # only tokens that pass the rug filters
+```
+
+`scan` pulls live DexScreener data, enriches it with **RugCheck** / **GoPlus**
+security checks, and writes `watchlist.yaml`. Two honesty rules are baked in:
+
+- **Attention ≠ prediction.** The score ranks how much activity a token has
+  *right now*. By the time a coin trends, you're usually late. Most trending
+  tokens **fail** the rug filters — that's the honest reality, not a bug.
+- **Rug filters** reject: live mint/freeze authority, unlocked LP, honeypots,
+  extreme holder concentration, insider bundling, dust liquidity, dead volume,
+  brand-new launches, and high RugCheck risk scores. Unknown data is never
+  treated as a pass or a fail.
+
+The dashboard's **Signals** tab shows the watchlist with one-click links to
+verify each token on RugCheck / GMGN / Axiom. The **Observe** tab explains how
+to *watch* the same tokens on Axiom and practice with **MockApe** (a paper-trading
+overlay for Axiom/GMGN) — the bot itself stays paper-only and never routes orders
+anywhere. See [`RECHERCHE_MEMECOIN.md`](RECHERCHE_MEMECOIN.md) for the sourced
+research behind all of this.
+
 ## Honest expectations
 
 This tool quantifies **risk** and describes **past simulated behaviour**. It does

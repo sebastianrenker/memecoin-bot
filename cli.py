@@ -391,6 +391,53 @@ def cmd_optimize(args) -> int:
     return 0
 
 
+def cmd_scan(args) -> int:
+    """Scan currently-active on-chain memecoins: attention signal + rug filters.
+
+    Attention = current activity, NOT a prediction. Every token gets a link to
+    verify on RugCheck/GMGN/Axiom before you ever risk real money.
+    """
+    _banner()
+    from data.memecoin_filters import (FilterConfig, fetch_goplus_solana,
+                                        fetch_rugcheck, merge_metadata)
+    from data.signals import build_watchlist, fetch_dexscreener_boosted
+    print(f"\nScanning boosted {args.chain} tokens (attention + rug filters)... "
+          "(real data; best-effort)\n")
+    feats = fetch_dexscreener_boosted(args.chain, limit=args.limit)
+    if not feats:
+        print("No live token data returned (network/rate-limit). Nothing faked.")
+        return 1
+    metas = {}
+    if not args.no_rugcheck and args.chain == "solana":
+        for f in feats:
+            rc = fetch_rugcheck(f.mint)
+            gp = fetch_goplus_solana(f.mint) if args.goplus else None
+            metas[f.mint] = merge_metadata(rc, gp)
+    cfg = FilterConfig()
+    wl = build_watchlist(feats, metas, cfg, tradeable_only=args.tradeable_only)
+
+    print(f"{'att':>4}  {'ok':>3}  {'symbol':<12}{'liq$':>12}{'vol24$':>14}  flags")
+    print("-" * 90)
+    for s in wl[: args.limit]:
+        flags = ",".join(s.risk.reasons[:2]) if s.risk.reasons else "-"
+        ok = "yes" if s.tradeable else "NO"
+        print(f"{s.attention:>4.0f}  {ok:>3}  {s.symbol:<12}"
+              f"{s.features['liquidity_usd']:>12,.0f}{s.features['volume_24h_usd']:>14,.0f}  {flags[:44]}")
+
+    if args.out:
+        payload = {"generated_ts": int(time.time() * 1000),
+                   "disclaimer": ("Attention = current activity, NOT a prediction. Most "
+                                  "memecoins go to zero. Verify on RugCheck/GMGN/Axiom. "
+                                  "This tool never places real orders."),
+                   "tokens": [s.as_dict() for s in wl]}
+        with open(args.out, "w", encoding="utf-8") as fh:
+            yaml.safe_dump(payload, fh, sort_keys=False, allow_unicode=True)
+        print(f"\nWrote {len(wl)} tokens to {args.out}")
+    print("\nReminder: 'attention' ranks buzz, not future price. By the time a coin trends "
+          "you are usually late. Verify every token yourself before risking anything.")
+    return 0
+
+
 def cmd_status(args) -> int:
     from persistence.db import Database
     db = Database(_resolve_db(DEFAULT_DB))
@@ -468,6 +515,15 @@ def build_parser() -> argparse.ArgumentParser:
     op.add_argument("--strategy", required=True)
     op.add_argument("--symbol", required=True)
     op.set_defaults(func=cmd_optimize)
+
+    sc = sub.add_parser("scan", help="scan active on-chain memecoins (attention + rug filters)")
+    sc.add_argument("--chain", default="solana")
+    sc.add_argument("--limit", type=int, default=25)
+    sc.add_argument("--tradeable-only", action="store_true", help="only tokens passing rug filters")
+    sc.add_argument("--no-rugcheck", action="store_true", help="skip RugCheck (faster, fewer checks)")
+    sc.add_argument("--goplus", action="store_true", help="also query GoPlus security")
+    sc.add_argument("--out", default="watchlist.yaml")
+    sc.set_defaults(func=cmd_scan)
 
     st = sub.add_parser("status", help="print current status")
     st.set_defaults(func=cmd_status)
