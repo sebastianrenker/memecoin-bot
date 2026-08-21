@@ -130,7 +130,7 @@ def _candles_with_markers(db: Database, positions) -> None:
             color=alt.condition("datum.pnl >= 0", alt.value("#2ca02c"), alt.value("#d62728")),
             tooltip=["strategy", "symbol", "pnl", "r_multiple", "reason"])
         layers.append(markers)
-    st.altair_chart(alt.layer(*layers).interactive(), use_container_width=True)
+    st.altair_chart(alt.layer(*layers).interactive())
 
 
 def tab_ranking(db: Database) -> None:
@@ -188,7 +188,20 @@ def tab_heatmap(db: Database) -> None:
         return
     df = pd.DataFrame(evals).sort_values("id").drop_duplicates(["strategy", "symbol"], keep="last")
     pivot = df.pivot_table(index="strategy", columns="symbol", values="score", aggfunc="last")
-    st.dataframe(pivot.style.background_gradient(cmap="RdYlGn", vmin=0, vmax=100))
+
+    # Colour cells ourselves (red->yellow->green) so we do NOT pull in matplotlib,
+    # which Styler.background_gradient would otherwise force as a dependency.
+    def _color(v):
+        if v != v:  # NaN
+            return ""
+        v = max(0.0, min(100.0, float(v)))
+        if v < 50:
+            r, g = 220, int(60 + (v / 50.0) * 160)
+        else:
+            r, g = int(220 - ((v - 50) / 50.0) * 180), 200
+        return f"background-color: rgb({r},{g},60); color: #111"
+
+    st.dataframe(pivot.style.applymap(_color).format("{:.0f}"))
 
 
 def tab_audit(db: Database) -> None:
