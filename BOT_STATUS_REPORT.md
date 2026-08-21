@@ -2,16 +2,18 @@
 
 **Paper trading — simulated money only. Live trading is locked. Memecoins are extremely risky and mostly go to zero. This is not advice and not a prediction.**
 
-- Generated (UTC): 2026-08-21 14:25:21
+- Generated (UTC): 2026-08-21 15:53:53
 - Status: **running**
-- Equity (simulated): 10000.00
-- Cash: 10000.00
+- Equity (simulated): 10156.11
+- Cash: 10156.11
 - Open positions: 0
-- Combos processed / skipped: 2 / 0
+- Combos processed / skipped: 0 / 18
 - Circuit breaker: False  |  Kill switch: False
 
 ## Open positions
 _none_
 
 ## Last trades (simulated)
-_none yet_
+| strategy | symbol | pnl | R | reason |
+|---|---|---|---|---|
+| donchian_breakout | FLOKI/USDT | 156.11 | 1.56 | take_profit |
