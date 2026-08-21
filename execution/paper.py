@@ -150,9 +150,12 @@ class PaperTrader:
 
         processed, skipped = 0, 0
         last_prices: Dict[Tuple[str, str], float] = {}
+        df_by_symbol: Dict[str, Optional[pd.DataFrame]] = {}  # fetch each symbol once per tick
 
         for combo in self.combos:
-            df = self._fetch_closed(combo.symbol, now_ms)
+            if combo.symbol not in df_by_symbol:
+                df_by_symbol[combo.symbol] = self._fetch_closed(combo.symbol, now_ms)
+            df = df_by_symbol[combo.symbol]
             if df is None:
                 skipped += 1
                 continue
