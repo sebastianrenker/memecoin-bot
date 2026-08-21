@@ -50,11 +50,11 @@ def _db() -> Database:
 
 
 def _banners() -> None:
-    st.warning("**PAPER TRADING — SIMULATED MONEY ONLY.** Live trading is locked "
-               "(`LiveTradingNotEnabled`). No real orders are ever placed.")
-    st.error("**MEMECOIN RISK:** most memecoins go to zero; rugpulls are common, liquidity "
-             "is thin, slippage is high. A positive short-term result is usually noise. "
-             "Not investment advice, not a prediction.")
+    st.warning("**PAPER-TRADING — NUR SIMULIERTES GELD.** Live-Handel ist gesperrt "
+               "(`LiveTradingNotEnabled`). Es werden **nie** echte Orders platziert.")
+    st.error("**MEMECOIN-RISIKO:** die meisten Memecoins gehen gegen null; Rugpulls sind "
+             "häufig, Liquidität dünn, Slippage hoch. Ein kurzfristiges Plus ist meist "
+             "Rauschen. Keine Anlageberatung, keine Prognose.")
 
 
 def _pill(text: str, kind: str) -> str:
@@ -83,6 +83,12 @@ def tab_live(db_path: str, auto: bool = False, secs: int = 15) -> None:
     _render()
     # Heavy per-coin charts render outside the auto-refresh fragment (network).
     _render_all_charts(db_path)
+    # Full trade evaluation (db-only) after the charts.
+    _db = Database(db_path)
+    try:
+        _render_trade_analytics(_db.recent_trades(5000))
+    finally:
+        _db.close()
 
 
 def _render_live(db: Database) -> None:
@@ -127,28 +133,28 @@ def _render_live(db: Database) -> None:
 
     # KPIs
     m1, m2, m3, m4, m5, m6 = st.columns(6)
-    m1.metric("Equity (sim)", f"{cur_eq:,.2f}", f"{pnl_pct:+.2f}%")
-    m2.metric("P&L (sim)", f"{pnl_abs:+,.2f}")
-    m3.metric("Win rate", f"{wr:.0f}%", f"{len(wins)}/{len(trades)}")
-    m4.metric("Profit factor", "∞" if pf == float("inf") else f"{pf:.2f}")
-    m5.metric("Open positions", len(positions))
+    m1.metric("Kapital (Paper)", f"{cur_eq:,.2f}", f"{pnl_pct:+.2f}%")
+    m2.metric("G/V (Paper)", f"{pnl_abs:+,.2f}")
+    m3.metric("Trefferquote", f"{wr:.0f}%", f"{len(wins)}/{len(trades)}")
+    m4.metric("Profit-Faktor", "∞" if pf == float("inf") else f"{pf:.2f}")
+    m5.metric("Offene Pos.", len(positions))
     age = (time.time() * 1000 - hb["ts"]) / 1000 if hb.get("ts") else None
-    m6.metric("Heartbeat age", f"{age:.0f}s" if age is not None else "-")
+    m6.metric("Letzter Tick", f"vor {age:.0f}s" if age is not None else "-")
 
     if not READONLY:
         c1, c2, c3, c4 = st.columns(4)
-        if c1.button("⏸ Stop (safe)"):
-            db.set_control("command", "stop"); st.success("Stop requested.")
-        if c2.button("▶ Run"):
-            db.set_control("command", "run"); st.success("Run requested.")
-        if c3.button("Reset daily breaker"):
-            db.set_control("reset_breaker", "1"); st.success("Breaker reset requested.")
-        if c4.button("Clear kill switch"):
-            db.set_control("kill_tripped", "0"); st.success("Kill switch cleared.")
+        if c1.button("⏸ Stop (sicher)"):
+            db.set_control("command", "stop"); st.success("Stop angefordert.")
+        if c2.button("▶ Weiter"):
+            db.set_control("command", "run"); st.success("Weiter angefordert.")
+        if c3.button("Tages-Breaker zurücksetzen"):
+            db.set_control("reset_breaker", "1"); st.success("Breaker-Reset angefordert.")
+        if c4.button("Kill-Switch löschen"):
+            db.set_control("kill_tripped", "0"); st.success("Kill-Switch gelöscht.")
     else:
-        st.caption("Read-only cloud view — control buttons are hidden.")
+        st.caption("Nur-Lese-Cloud-Ansicht — Steuerung ausgeblendet.")
 
-    st.markdown("#### Equity curve (simulated)")
+    st.markdown("#### Kapitalkurve (Paper)")
     curve = db.equity_curve(5000)
     if curve:
         ec = pd.DataFrame(curve, columns=["ts", "equity"])
@@ -163,16 +169,82 @@ def _render_live(db: Database) -> None:
     else:
         st.caption("No equity points yet. Run `python cli.py ci-tick`.")
 
-    cA, cB = st.columns(2)
-    with cA:
-        st.markdown("#### Open positions")
-        st.dataframe(pd.DataFrame(positions) if positions
-                     else pd.DataFrame(columns=["strategy", "symbol"]), use_container_width=True)
-    with cB:
-        st.markdown("#### Recent trades (simulated)")
-        st.dataframe(pd.DataFrame(trades[:20]) if trades
-                     else pd.DataFrame(columns=["strategy", "symbol", "pnl"]),
-                     use_container_width=True)
+    st.markdown("#### Offene Positionen")
+    if positions:
+        pv = pd.DataFrame(positions)[["strategy", "symbol", "side", "qty", "entry", "stop", "tp"]]
+        st.dataframe(pv, use_container_width=True, hide_index=True)
+    else:
+        st.caption("Keine offenen Positionen.")
+
+
+def _render_trade_analytics(trades) -> None:
+    import numpy as np
+    st.markdown("#### Trade-Auswertung (geschlossene Trades)")
+    closed = [t for t in trades if t.get("ts_close")]
+    if not closed:
+        st.caption("Noch keine geschlossenen Trades — die Auswertung erscheint, sobald der Bot "
+                   "die erste Position schließt (Stop, Take-Profit oder Signal).")
+        return
+    df = pd.DataFrame(closed)
+    r = df["r_multiple"].to_numpy(float)
+    pnl = df["pnl"].to_numpy(float)
+    wins = pnl > 0
+    winrate = wins.mean() * 100
+    gp, gl = pnl[pnl > 0].sum(), -pnl[pnl < 0].sum()
+    pf = gp / gl if gl > 0 else float("inf")
+    avg_win = r[wins].mean() if wins.any() else 0.0
+    avg_loss = r[~wins].mean() if (~wins).any() else 0.0
+    # longest losing streak
+    streak = mx = 0
+    for w in wins:
+        streak = 0 if w else streak + 1
+        mx = max(mx, streak)
+
+    m = st.columns(6)
+    m[0].metric("Trades", len(closed))
+    m[1].metric("Trefferquote", f"{winrate:.0f}%", f"{int(wins.sum())}/{len(closed)}")
+    m[2].metric("Erwartung/Trade", f"{r.mean():+.2f} R")
+    m[3].metric("Profit-Faktor", "∞" if pf == float("inf") else f"{pf:.2f}")
+    m[4].metric("Ø Gewinn/Verlust", f"{avg_win:+.2f}R / {avg_loss:+.2f}R")
+    m[5].metric("Längste Verlustserie", f"{mx}")
+
+    cL, cR = st.columns(2)
+    with cL:
+        st.caption("R-Verteilung (Gewinn/Verlust je Trade in Risiko-Einheiten)")
+        try:
+            import altair as alt
+            rdf = pd.DataFrame({"R": r})
+            hist = alt.Chart(rdf).mark_bar(color="#4c8dff").encode(
+                x=alt.X("R:Q", bin=alt.Bin(maxbins=20), title="R-Vielfaches"),
+                y=alt.Y("count()", title="Trades"))
+            zero = alt.Chart(pd.DataFrame({"x": [0]})).mark_rule(
+                color="#ff6b6b", strokeDash=[4, 4]).encode(x="x:Q")
+            st.altair_chart(alt.layer(hist, zero), use_container_width=True)
+        except Exception:
+            st.bar_chart(pd.Series(r).round(1).value_counts().sort_index())
+    with cR:
+        st.caption("P&L nach Strategie / Coin")
+        by_strat = (df.groupby("strategy")
+                    .agg(Trades=("pnl", "size"), PnL=("pnl", "sum"),
+                         Trefferquote=("pnl", lambda s: round((s > 0).mean() * 100)),
+                         avgR=("r_multiple", "mean")).round(2)
+                    .sort_values("PnL", ascending=False))
+        st.dataframe(by_strat, use_container_width=True)
+        by_coin = (df.groupby("symbol")
+                   .agg(Trades=("pnl", "size"), PnL=("pnl", "sum"),
+                        Trefferquote=("pnl", lambda s: round((s > 0).mean() * 100))).round(2)
+                   .sort_values("PnL", ascending=False))
+        st.dataframe(by_coin, use_container_width=True)
+
+    with st.expander(f"Alle Trades ({len(df)})"):
+        show = df.copy()
+        show["dauer_min"] = ((show["ts_close"] - show["ts_open"]) / 60000).round(0)
+        show = show.sort_values("ts_close", ascending=False)[
+            ["symbol", "strategy", "side", "entry", "exit", "pnl", "r_multiple", "reason", "dauer_min"]]
+        st.dataframe(show, use_container_width=True, hide_index=True, column_config={
+            "pnl": st.column_config.NumberColumn("P&L", format="%.2f"),
+            "r_multiple": st.column_config.NumberColumn("R", format="%.2f"),
+        })
 
 
 @st.cache_data(ttl=120, show_spinner=False)
@@ -221,8 +293,9 @@ def _coin_chart(symbol: str, timeframe: str, days: int, trades, position) -> Non
         color=alt.condition("datum.close >= datum.open", alt.value("#2ca02c"), alt.value("#d62728")))
     layers = [wick, body]
 
-    # Entry (buy) and exit (sell) markers from this symbol's trades.
-    st_trades = [t for t in trades if t["symbol"] == symbol]
+    # Entry (buy) and exit (sell) markers — cap to the most recent to avoid clutter.
+    st_trades = sorted([t for t in trades if t["symbol"] == symbol],
+                       key=lambda t: t.get("ts_close") or 0)[-80:]
     entries = [{"time": pd.to_datetime(t["ts_open"], unit="ms"), "price": t["entry"],
                 "strat": t["strategy"]} for t in st_trades if t.get("ts_open")]
     exits = [{"time": pd.to_datetime(t["ts_close"], unit="ms"), "price": t["exit"],
@@ -578,25 +651,25 @@ def _pick_db_path() -> str:
     default (TRADING_DB) is honoured as the initial selection.
     """
     candidates = {
-        "Live paper (active demo, real 5m data)": os.path.join("cloud", "live.db"),
-        "CEX paper (real ccxt data)": os.path.join("cloud", "paper.db"),
-        "On-chain paper (real GeckoTerminal data)": os.path.join("cloud", "dex.db"),
+        "Live-Paper (aktiv, echte 5m-Daten)": os.path.join("cloud", "live.db"),
+        "CEX-Paper (echte ccxt-Daten)": os.path.join("cloud", "paper.db"),
+        "On-Chain-Paper (echte GeckoTerminal-Daten)": os.path.join("cloud", "dex.db"),
     }
     # Include the env-configured DB if it's something else entirely.
     if DB_PATH not in candidates.values():
-        candidates[f"Configured ({DB_PATH})"] = DB_PATH
+        candidates[f"Konfiguriert ({DB_PATH})"] = DB_PATH
     labels = list(candidates)
     default_idx = next((i for i, l in enumerate(labels) if candidates[l] == DB_PATH), 0)
     with st.sidebar:
-        st.markdown("### Bot view")
-        st.caption("All are paper (simulated money) on real market data.")
-        choice = st.radio("Data source", labels, index=default_idx)
+        st.markdown("### Bot-Ansicht")
+        st.caption("Alle sind Paper (simuliertes Geld) auf echten Marktdaten.")
+        choice = st.radio("Datenquelle", labels, index=default_idx)
         path = candidates[choice]
-        st.caption(f"DB: `{path}`" + ("" if os.path.exists(path) else "  · not created yet"))
-        st.markdown("### Live view")
-        auto = st.checkbox("Auto-refresh (Live tab only)", value=True)
-        secs = st.slider("Every N seconds", 5, 60, 15, disabled=not auto)
-        st.caption("Refreshes only the Live tab in place — other tabs stay put.")
+        st.caption(f"DB: `{path}`" + ("" if os.path.exists(path) else "  · noch nicht angelegt"))
+        st.markdown("### Live-Ansicht")
+        auto = st.checkbox("Auto-Refresh (nur Live-Tab)", value=True)
+        secs = st.slider("Alle N Sekunden", 5, 60, 15, disabled=not auto)
+        st.caption("Aktualisiert nur den Live-Tab an Ort und Stelle — andere Tabs bleiben stehen.")
     return path, auto, secs
 
 
