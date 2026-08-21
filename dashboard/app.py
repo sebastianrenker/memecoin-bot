@@ -170,15 +170,75 @@ def _candles_with_markers(db: Database, positions, trades) -> None:
     st.altair_chart(alt.layer(*layers).interactive(), use_container_width=True)
 
 
+_DISCOVER_CSS = """
+<style>
+.ax-legend{color:#8b93a7;font-size:.75rem;margin:.2rem 0 .6rem}
+.ax-head{display:grid;grid-template-columns:1.7fr .95fr .8fr 1fr 1fr .95fr .7fr 1.1fr 1.5fr;
+  gap:8px;color:#7f889c;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;
+  padding:4px 12px}
+.ax-row{display:grid;grid-template-columns:1.7fr .95fr .8fr 1fr 1fr .95fr .7fr 1.1fr 1.5fr;
+  gap:8px;align-items:center;background:#121722;border:1px solid #1e2430;border-radius:10px;
+  padding:9px 12px;margin-bottom:6px}
+.ax-row:hover{border-color:#2b64ff;background:#141b28}
+.ax-sym{font-weight:700;font-size:.95rem}
+.ax-mint{color:#6b7488;font-size:.66rem}
+.chip{padding:1px 7px;border-radius:6px;font-size:.66rem;font-weight:700;margin-left:6px}
+.chip.solana{background:#2e2559;color:#c4b5fd}.chip.bsc{background:#4d3f12;color:#f2c14e}
+.chip.ethereum{background:#22314d;color:#8ab4ff}.chip.base{background:#123a52;color:#7fd7ff}
+.num{font-variant-numeric:tabular-nums}
+.pos{color:#33d17a}.neg{color:#ff6b6b}.mut{color:#8b93a7}
+.pill{padding:2px 8px;border-radius:999px;font-size:.7rem;font-weight:700;text-align:center}
+.pill.ok{background:#123d24;color:#5ee08a}.pill.no{background:#3d1414;color:#ff8a8a}
+.abar{height:7px;background:#1e2430;border-radius:5px;overflow:hidden;min-width:60px}
+.abar>i{display:block;height:100%;background:linear-gradient(90deg,#2b64ff,#14e0a0)}
+.acts a{padding:2px 8px;border-radius:7px;background:#1b2130;border:1px solid #2a3342;
+  color:#cbd3e1;font-size:.7rem;text-decoration:none;margin-right:4px;white-space:nowrap}
+.acts a.x{color:#8ab4ff;border-color:#2a3a5a}.acts a.ax{color:#14e0a0;border-color:#1c4a3a}
+.acts a.rc{color:#f2b3b3;border-color:#4a2a2a}
+</style>
+"""
+
+
+def _fmt_usd(x) -> str:
+    try:
+        x = float(x or 0)
+    except Exception:
+        return "-"
+    if x >= 1e9:
+        return f"${x/1e9:.2f}B"
+    if x >= 1e6:
+        return f"${x/1e6:.2f}M"
+    if x >= 1e3:
+        return f"${x/1e3:.1f}k"
+    return f"${x:,.0f}"
+
+
+def _fmt_price(x) -> str:
+    try:
+        x = float(x or 0)
+    except Exception:
+        return "-"
+    if x == 0:
+        return "-"
+    if x >= 1:
+        return f"${x:,.4f}"
+    return f"${x:.8f}".rstrip("0").rstrip(".")
+
+
+def _esc(s) -> str:
+    import html as _h
+    return _h.escape(str(s if s is not None else ""))
+
+
 def tab_discover() -> None:
     st.markdown("### Discover — live coins, classified")
-    st.info("Everything the tool knows about the currently-active coins: on-chain data, "
-            "a **risk classification**, an **attention** rank (activity NOW, not a forecast), "
-            "and a link straight to the **live X/Twitter feed** for each coin. There is no "
-            "free reliable auto-sentiment — so you get the real live feed instead. Refresh "
-            "with `python cli.py scan --chains sol,bnb,eth`.")
+    st.markdown('<div class="ax-legend">Axiom-style board of the currently-active coins: '
+                'on-chain data, risk classification, an attention rank (activity NOW, not a '
+                'forecast), and a one-click link to the LIVE X/Twitter feed per coin. No free '
+                'reliable auto-sentiment exists, so you get the real feed. Paper only.</div>',
+                unsafe_allow_html=True)
     if not os.path.exists(WATCHLIST_PATH):
-        st.caption(f"No `{WATCHLIST_PATH}` yet. Run `python cli.py scan` to generate it.")
+        st.caption(f"No `{WATCHLIST_PATH}` yet. Run `python cli.py scan --chains sol,bnb,eth`.")
         return
     try:
         import yaml
@@ -191,68 +251,85 @@ def tab_discover() -> None:
         st.caption("Watchlist is empty.")
         return
 
-    try:
-        from core.advisor import advise
-        from data.memecoin_filters import FilterVerdict
-        have_adv = True
-    except Exception:
-        have_adv = False
+    # Controls
+    chains = sorted({t.get("chain", "solana") for t in tokens})
+    c1, c2, c3 = st.columns([2, 1, 1])
+    sel_chains = c1.multiselect("Chains", chains, default=chains)
+    only_ok = c2.checkbox("Tradeable only", value=False)
+    sort_by = c3.selectbox("Sort", ["attention", "market cap", "24h %", "volume"])
+    view = [t for t in tokens if t.get("chain", "solana") in sel_chains
+            and (t.get("tradeable") if only_ok else True)]
+    keyf = {"attention": lambda t: t.get("attention", 0),
+            "market cap": lambda t: (t.get("features", {}).get("market_cap")
+                                     or t.get("features", {}).get("fdv") or 0),
+            "24h %": lambda t: t.get("features", {}).get("price_change_24h", 0),
+            "volume": lambda t: t.get("features", {}).get("volume_24h_usd", 0)}[sort_by]
+    view.sort(key=keyf, reverse=True)
 
-    rows = []
-    for t in tokens:
-        f = t.get("features", {})
-        lk = t.get("links", {})
-        verdict = None
-        action = "-"
-        if have_adv:
-            rv = t.get("risk", {})
-            verdict = FilterVerdict(rv.get("passed", True), rv.get("reasons", []), rv.get("checked", 0))
-            action = advise(rug_verdict=verdict, attention=t.get("attention")).action
-        rows.append({
-            "att": t.get("attention"),
-            "verdict": ("✅ tradeable" if t.get("tradeable") else "⛔ avoid"),
-            "advice": action,
-            "symbol": t.get("symbol"), "chain": t.get("chain"),
-            "price$": f.get("price_usd"), "24h%": f.get("price_change_24h"),
-            "liq$": f.get("liquidity_usd"), "vol24$": f.get("volume_24h_usd"),
-            "mcap$": f.get("market_cap") or f.get("fdv"), "age_h": f.get("age_hours"),
-            "X/Twitter": lk.get("x_search"), "Axiom": lk.get("axiom"),
-            "RugCheck": lk.get("rugcheck"), "GMGN": lk.get("gmgn"), "Dex": lk.get("dexscreener"),
-        })
-    df = pd.DataFrame(rows)
-    st.dataframe(df, use_container_width=True, hide_index=True, column_config={
-        "X/Twitter": st.column_config.LinkColumn("X/Twitter", display_text="live feed"),
-        "Axiom": st.column_config.LinkColumn("Axiom", display_text="observe"),
-        "RugCheck": st.column_config.LinkColumn("RugCheck", display_text="check"),
-        "GMGN": st.column_config.LinkColumn("GMGN", display_text="open"),
-        "Dex": st.column_config.LinkColumn("Dex", display_text="chart"),
-        "price$": st.column_config.NumberColumn(format="$%.8f"),
-        "24h%": st.column_config.NumberColumn(format="%.1f%%"),
-        "liq$": st.column_config.NumberColumn(format="$%d"),
-        "vol24$": st.column_config.NumberColumn(format="$%d"),
-        "mcap$": st.column_config.NumberColumn(format="$%d"),
-    })
+    st.markdown(_DISCOVER_CSS, unsafe_allow_html=True)
+    st.markdown('<div class="ax-head"><div>Coin</div><div>Price</div><div>24h</div>'
+                '<div>Mkt Cap</div><div>Liquidity</div><div>Volume 24h</div><div>Age</div>'
+                '<div>Attention</div><div>Risk / actions</div></div>', unsafe_allow_html=True)
+
+    html_rows = []
+    for t in view:
+        f, lk = t.get("features", {}), t.get("links", {})
+        chain = t.get("chain", "solana")
+        ch24 = f.get("price_change_24h", 0) or 0
+        chcls = "pos" if ch24 >= 0 else "neg"
+        att = float(t.get("attention", 0) or 0)
+        ok = bool(t.get("tradeable"))
+        pill = f'<div class="pill {"ok" if ok else "no"}">{"tradeable" if ok else "avoid"}</div>'
+        age_h = f.get("age_hours", 0) or 0
+        age = f"{age_h/24:.1f}d" if age_h >= 24 else f"{age_h:.0f}h"
+        mint = t.get("mint", "")
+        acts = []
+        if lk.get("x_search"):
+            acts.append(f'<a class="x" target="_blank" href="{_esc(lk["x_search"])}">X</a>')
+        if lk.get("axiom"):
+            acts.append(f'<a class="ax" target="_blank" href="{_esc(lk["axiom"])}">Axiom</a>')
+        if lk.get("rugcheck"):
+            acts.append(f'<a class="rc" target="_blank" href="{_esc(lk["rugcheck"])}">Rug</a>')
+        if lk.get("gmgn"):
+            acts.append(f'<a target="_blank" href="{_esc(lk["gmgn"])}">GMGN</a>')
+        if lk.get("dexscreener"):
+            acts.append(f'<a target="_blank" href="{_esc(lk["dexscreener"])}">Dex</a>')
+        html_rows.append(
+            f'<div class="ax-row">'
+            f'<div><span class="ax-sym">{_esc(t.get("symbol"))}</span>'
+            f'<span class="chip {chain}">{_esc(chain)}</span>'
+            f'<div class="ax-mint">{_esc(mint[:14])}{"…" if len(mint)>14 else ""}</div></div>'
+            f'<div class="num">{_fmt_price(f.get("price_usd"))}</div>'
+            f'<div class="num {chcls}">{ch24:+.1f}%</div>'
+            f'<div class="num">{_fmt_usd(f.get("market_cap") or f.get("fdv"))}</div>'
+            f'<div class="num">{_fmt_usd(f.get("liquidity_usd"))}</div>'
+            f'<div class="num">{_fmt_usd(f.get("volume_24h_usd"))}</div>'
+            f'<div class="num mut">{age}</div>'
+            f'<div><div class="abar"><i style="width:{max(3,min(100,att)):.0f}%"></i></div>'
+            f'<div class="mut" style="font-size:.66rem">{att:.0f}/100</div></div>'
+            f'<div>{pill}<div class="acts" style="margin-top:5px">{"".join(acts)}</div></div>'
+            f'</div>')
+    st.markdown("".join(html_rows), unsafe_allow_html=True)
+
     n_ok = sum(1 for t in tokens if t.get("tradeable"))
-    st.caption(f"{len(tokens)} coins · {n_ok} passed the rug filters. Most trending coins "
-               "fail — that is the honest reality, not a bug.")
+    st.caption(f"{len(view)} shown · {len(tokens)} scanned · {n_ok} passed the rug filters. "
+               "Most trending coins fail — the honest reality, not a bug.")
 
-    st.markdown("#### Per-coin detail")
-    pick = st.selectbox("Coin", [f"{t.get('symbol')} ({t.get('chain')})" for t in tokens])
-    tok = tokens[[f"{t.get('symbol')} ({t.get('chain')})" for t in tokens].index(pick)]
-    f, lk = tok.get("features", {}), tok.get("links", {})
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Attention", f"{tok.get('attention')}/100")
-    c2.metric("24h change", f"{f.get('price_change_24h', 0):+.1f}%")
-    c3.metric("Verdict", "tradeable" if tok.get("tradeable") else "avoid")
-    st.write("**Risk flags:** " + ("; ".join(tok.get("risk", {}).get("reasons", [])) or "none known"))
-    st.write("**Data:**", {k: f.get(k) for k in
-             ["price_usd", "liquidity_usd", "volume_24h_usd", "market_cap", "fdv",
-              "price_change_1h", "price_change_6h", "price_change_24h", "age_hours",
-              "buys_5m", "sells_5m", "boosts", "dex"] if k in f})
-    st.markdown("**Links:** " + " · ".join(
-        f"[{name}]({url})" for name, url in lk.items() if url))
-    st.caption("Attention/verdict describe the present, not the future. Verify on the live "
-               "X feed + RugCheck before ever risking real money. Paper only here.")
+    # Per-coin detail
+    with st.expander("Per-coin detail (all data + flags + links)"):
+        labels = [f"{t.get('symbol')} ({t.get('chain')})" for t in view]
+        if labels:
+            pick = st.selectbox("Coin", labels)
+            tok = view[labels.index(pick)]
+            f, lk = tok.get("features", {}), tok.get("links", {})
+            st.write("**Risk flags:** " +
+                     ("; ".join(tok.get("risk", {}).get("reasons", [])) or "none known"))
+            st.json({k: f.get(k) for k in
+                     ["price_usd", "liquidity_usd", "volume_24h_usd", "market_cap", "fdv",
+                      "price_change_1h", "price_change_6h", "price_change_24h", "age_hours",
+                      "buys_5m", "sells_5m", "boosts", "dex", "pool_address"] if k in f})
+            st.markdown("**Links:** " + " · ".join(
+                f"[{name}]({url})" for name, url in lk.items() if url))
 
 
 def tab_observe() -> None:

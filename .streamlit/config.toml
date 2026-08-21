@@ -1,0 +1,10 @@
+# Dark, Axiom-like theme for the dashboard (local + Streamlit Community Cloud).
+[theme]
+base = "dark"
+primaryColor = "#14e0a0"
+backgroundColor = "#0a0e17"
+secondaryBackgroundColor = "#121722"
+textColor = "#e6e9ef"
+
+[server]
+headless = true
