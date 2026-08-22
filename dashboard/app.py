@@ -155,6 +155,25 @@ def _render_live(db: Database) -> None:
         f'virtuelle €, simuliert, kein echtes Geld</div>'
         f'</div>', unsafe_allow_html=True)
 
+    # --- Kosten & Steuern (Schätzung) ------------------------------------
+    total_fees = sum(t.get("fees", 0.0) for t in trades)
+    tax_rate = st.session_state.get("tax_rate", 0.26)
+    free_limit = st.session_state.get("tax_free", 1000)
+    taxable = realized if realized > free_limit else 0.0
+    tax = tax_rate * taxable
+    net_after = realized - tax
+    st.markdown("##### 💶 Kosten & Steuern (Schätzung — **keine Steuerberatung**)")
+    k = st.columns(4)
+    k[0].metric("Gebühren gezahlt", f"{total_fees:,.2f} €")
+    k[1].metric("Realisiert (nach Gebühren)", f"{realized:+,.2f} €")
+    k[2].metric(f"Steuer (~{tax_rate*100:.0f}%)", f"-{tax:,.2f} €")
+    k[3].metric("Netto nach Steuer", f"{net_after:+,.2f} €")
+    st.caption(f"Grobe Schätzung. Freigrenze {free_limit:,.0f} €/Jahr (bis dahin steuerfrei — "
+               "typisch für private Veräußerungsgeschäfte in DE bei Haltedauer < 1 Jahr). Nur "
+               "**realisierte** Gewinne werden besteuert, offene nicht. Gebühren sind bereits "
+               "im P&L abgezogen. Das ist **keine Steuerberatung** — frag eine:n Steuerberater:in. "
+               "Satz in der Sidebar einstellbar.")
+
     # KPIs
     m1, m2, m3, m4, m5, m6 = st.columns(6)
     m1.metric("Kapital (Paper)", f"{cur_eq:,.2f} €", f"{pnl_pct:+.2f}%")
@@ -705,6 +724,10 @@ def _pick_db_path() -> str:
         auto = st.checkbox("Auto-Refresh (nur Live-Tab)", value=True)
         secs = st.slider("Alle N Sekunden", 5, 60, 15, disabled=not auto)
         st.caption("Aktualisiert nur den Live-Tab an Ort und Stelle — andere Tabs bleiben stehen.")
+        with st.expander("💶 Steuer-Schätzung (keine Beratung)"):
+            st.session_state["tax_rate"] = st.slider("Steuersatz %", 0, 45, 26) / 100.0
+            st.session_state["tax_free"] = st.number_input(
+                "Freigrenze €/Jahr", min_value=0, max_value=100000, value=1000, step=100)
     return path, auto, secs
 
 

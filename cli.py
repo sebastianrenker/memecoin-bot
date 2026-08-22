@@ -236,6 +236,61 @@ def cmd_export_active(args) -> int:
     return 0
 
 
+def cmd_select_validated(args) -> int:
+    """Pick ONLY walk-forward-validated combos (positive OOS edge, overfitting guard).
+
+    Honest: on memecoins few or none may pass — an empty result is a real answer,
+    not a failure. Writes active_combos_<name>.yaml for the live bot to trade.
+    """
+    _banner()
+    s = Settings.load(args.config)
+    from backtest.evaluation import PARAM_GRIDS
+    from core.utils import closed_bars
+    from data.base import DataUnavailable
+    from data.factory import build_data_source
+    from optimize.optimizer import optimize
+    data = build_data_source(s)
+    cfg = build_engine_config(s)
+    tf = s.get("data.timeframe", "5m")
+    lookback = int(s.get("data.lookback_days", 5))
+    strat_list = s.get("active.strategies", DEFAULT_ACTIVE_STRATEGIES)
+    folds = int(s.get("validation.walkforward.folds", 4))
+    wf_min = float(s.get("optimize.wf_efficiency_min", 0.5))
+    min_trades = int(s.get("optimize.min_trades", 20))
+
+    accepted, raw_cache = [], {}
+    print(f"Validiere {len(s.universe)}×{len(strat_list)} Kombis (Walk-Forward, Overfitting-Wächter)...\n")
+    for sym in s.universe:
+        if sym not in raw_cache:
+            try:
+                raw_cache[sym] = data.fetch_ohlcv(sym, tf, lookback)
+            except DataUnavailable as e:
+                print(f"  skip {sym}: {e}"); raw_cache[sym] = None
+        raw = raw_cache[sym]
+        if raw is None:
+            continue
+        df = closed_bars(raw, tf); df.attrs["symbol"] = sym
+        for name in strat_list:
+            r = optimize(name, df, cfg, PARAM_GRIDS.get(name, {}), folds=folds,
+                         wf_efficiency_min=wf_min, min_trades=min_trades)
+            tag = "ACCEPT " if r.accepted else "reject "
+            print(f"  {tag}{name}@{sym}  WFeff {r.mean_efficiency:.2f} · OOS {r.oos_trades} "
+                  f"· expR {r.oos_expectancy_r:+.3f} · {r.reason}")
+            if r.accepted:
+                accepted.append({"strategy": name, "symbol": sym, "params": r.params})
+    out = {"generated_ts": int(time.time() * 1000),
+           "note": ("Nur Walk-Forward-validierte Kombis: positive OOS-Erwartung, WF-Effizienz "
+                    ">= %.2f, genug Trades. Eine leere Liste ist ehrlich - dann gibt es aktuell "
+                    "keinen belegten Vorteil." % wf_min),
+           "combos": accepted}
+    with open(args.out, "w", encoding="utf-8") as fh:
+        yaml.safe_dump(out, fh, sort_keys=False, allow_unicode=True)
+    print(f"\n{len(accepted)} validierte Kombis geschrieben nach {args.out}")
+    if not accepted:
+        print("Ehrlich: nichts hat den strengen Test bestanden — aktuell kein belegter Vorteil.")
+    return 0
+
+
 def cmd_serve(args) -> int:
     _banner()
     s = Settings.load(args.config)
@@ -573,6 +628,10 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--active", default="active_combos.yaml")
     e.add_argument("--all-strategies", action="store_true")
     e.set_defaults(func=cmd_export_active)
+
+    vv = sub.add_parser("select-validated", help="pick only walk-forward-validated combos")
+    vv.add_argument("--out", default="active_combos_live.yaml")
+    vv.set_defaults(func=cmd_select_validated)
 
     sv = sub.add_parser("serve", help="run the paper trader continuously")
     sv.add_argument("--active", default="active_combos.yaml")
