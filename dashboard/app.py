@@ -116,6 +116,24 @@ def _render_live(db: Database) -> None:
     wr = (len(wins) / len(trades) * 100.0) if trades else 0.0
     unrealized = pnl_abs - realized
 
+    # Live mark-to-market: override the stale last-tick equity with current prices
+    # of the open positions, so the headline matches the per-coin live P&L.
+    cash_meta = db.get_meta("cash")
+    live = False
+    if positions and cash_meta is not None:
+        try:
+            live_unreal = 0.0
+            for p in positions:
+                cdf = _load_candles(p["symbol"], "5m", 2)
+                live_unreal += p["qty"] * (float(cdf["close"].iloc[-1]) - p["entry"])
+            cur_eq = float(cash_meta) + live_unreal
+            unrealized = live_unreal
+            pnl_abs = cur_eq - start_eq
+            pnl_pct = (pnl_abs / start_eq * 100.0) if start_eq else 0.0
+            live = True
+        except Exception:
+            live = False
+
     up = pnl_abs >= 0
     color = "#123d24" if up else "#3d1414"
     fg = "#5ee08a" if up else "#ff8a8a"
@@ -125,16 +143,16 @@ def _render_live(db: Database) -> None:
         f'<div style="background:{color};border:1px solid {fg}33;border-radius:14px;'
         f'padding:14px 18px;margin:6px 0 12px">'
         f'<div style="color:{fg};font-size:1.5rem;font-weight:800">{verdict} &nbsp; '
-        f'{pnl_pct:+.2f}% &nbsp;<span style="font-size:1rem">({pnl_abs:+,.2f} sim)</span></div>'
+        f'{pnl_abs:+,.2f} € &nbsp;<span style="font-size:1rem">({pnl_pct:+.2f}%)</span></div>'
         f'<div style="color:#c9d2e0;font-size:.82rem;margin-top:4px">'
-        f'Start {start_eq:,.0f} → jetzt {cur_eq:,.2f} · realisiert {realized:+,.2f} · '
-        f'offen (unrealisiert) {unrealized:+,.2f} · theoretisch/simuliert, kein echtes Geld</div>'
+        f'Start {start_eq:,.2f} € → jetzt {cur_eq:,.2f} € · realisiert {realized:+,.2f} € · '
+        f'offen (unrealisiert) {unrealized:+,.2f} € · virtuelle €, simuliert, kein echtes Geld</div>'
         f'</div>', unsafe_allow_html=True)
 
     # KPIs
     m1, m2, m3, m4, m5, m6 = st.columns(6)
-    m1.metric("Kapital (Paper)", f"{cur_eq:,.2f}", f"{pnl_pct:+.2f}%")
-    m2.metric("G/V (Paper)", f"{pnl_abs:+,.2f}")
+    m1.metric("Kapital (Paper)", f"{cur_eq:,.2f} €", f"{pnl_pct:+.2f}%")
+    m2.metric("G/V (Paper)", f"{pnl_abs:+,.2f} €")
     m3.metric("Trefferquote", f"{wr:.0f}%", f"{len(wins)}/{len(trades)}")
     m4.metric("Profit-Faktor", "∞" if pf == float("inf") else f"{pf:.2f}")
     m5.metric("Offene Pos.", len(positions))
@@ -229,12 +247,13 @@ def _render_trade_analytics(trades) -> None:
                          Trefferquote=("pnl", lambda s: round((s > 0).mean() * 100)),
                          avgR=("r_multiple", "mean")).round(2)
                     .sort_values("PnL", ascending=False))
-        st.dataframe(by_strat, use_container_width=True)
+        eur = {"PnL": st.column_config.NumberColumn("P&L", format="%.2f €")}
+        st.dataframe(by_strat, use_container_width=True, column_config=eur)
         by_coin = (df.groupby("symbol")
                    .agg(Trades=("pnl", "size"), PnL=("pnl", "sum"),
                         Trefferquote=("pnl", lambda s: round((s > 0).mean() * 100))).round(2)
                    .sort_values("PnL", ascending=False))
-        st.dataframe(by_coin, use_container_width=True)
+        st.dataframe(by_coin, use_container_width=True, column_config=eur)
 
     with st.expander(f"Alle Trades ({len(df)})"):
         show = df.copy()
@@ -242,7 +261,7 @@ def _render_trade_analytics(trades) -> None:
         show = show.sort_values("ts_close", ascending=False)[
             ["symbol", "strategy", "side", "entry", "exit", "pnl", "r_multiple", "reason", "dauer_min"]]
         st.dataframe(show, use_container_width=True, hide_index=True, column_config={
-            "pnl": st.column_config.NumberColumn("P&L", format="%.2f"),
+            "pnl": st.column_config.NumberColumn("P&L", format="%.2f €"),
             "r_multiple": st.column_config.NumberColumn("R", format="%.2f"),
         })
 
@@ -375,8 +394,18 @@ def _render_all_charts(db_path: str) -> None:
                      f"[Axiom](https://axiom.trade/t/{mint})"]
         st.markdown(" · ".join(links))
         if pos:
-            st.caption(f"Entry {pos['entry']:.6g} · Stop {pos['stop']:.6g}"
-                       + (f" · TP {pos['tp']:.6g}" if pos.get("tp") is not None else "")
+            try:
+                cdf = _load_candles(sym, tf, days)
+                cur = float(cdf["close"].iloc[-1])
+                upnl = pos["qty"] * (cur - pos["entry"])  # long-only
+                col = "#33d17a" if upnl >= 0 else "#ff6b6b"
+                st.markdown(f'**Aktuell {cur:.6g} € · offener G/V '
+                            f'<span style="color:{col}">{upnl:+,.2f} €</span>**',
+                            unsafe_allow_html=True)
+            except Exception:
+                pass
+            st.caption(f"Entry {pos['entry']:.6g} € · Stop {pos['stop']:.6g} €"
+                       + (f" · TP {pos['tp']:.6g} €" if pos.get("tp") is not None else "")
                        + f" · Menge {pos['qty']:.4g}")
         _coin_chart(sym, tf, days, trades, pos)
 
