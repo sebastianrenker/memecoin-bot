@@ -13,3 +13,4 @@ venv/
 !cloud/paper.db
 !cloud/dex.db
 !cloud/live.db
+!cloud/validated.db

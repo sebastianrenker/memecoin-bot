@@ -1,0 +1,52 @@
+# FORWARD-TEST of the walk-forward-VALIDATED combos (see active_combos_validated.yaml).
+# These 8 combos passed a strict walk-forward test (positive OOS expectancy, WF
+# efficiency >= 0.5, enough OOS trades). This config trades them FORWARD on real
+# data so you can see, honestly, whether the edge HOLDS out-of-sample or was just
+# the past (esp. PEPE's run — 5/8 are PEPE, so treat as fragile).
+#
+# SIMULATED money only. Live trading is locked. No profit is guaranteed.
+
+mode: paper
+
+data:
+  require_real: true
+  source: ccxt
+  exchange: binance
+  quote: USDT
+  timeframe: 1h                # per-combo timeframe overrides this (combos are 1h & 4h)
+  lookback_days: 365
+  cache_dir: .cache
+  cache_ttl_min: 20
+  max_retries: 4
+  backoff_base_sec: 1.5
+  universe: []                 # combos come from active_combos_validated.yaml
+  auto_discovery: {enabled: false}
+
+engine:
+  initial_equity: 200.0
+  fee_rate: 0.001
+  slippage_rate: 0.0015
+  risk_per_trade: 0.01         # 1% — never loosened
+  leverage_cap: 1.0
+  min_stop_frac: 0.005
+  take_profit_r: 2.0
+  allow_short: false
+  cost_multiplier: 1.0         # realistic (the combos were validated at 1.0)
+
+risk:
+  max_open_positions: 8
+  daily_loss_limit: 0.03
+  max_drawdown_kill: 0.25
+
+validation:
+  walkforward: {train_frac: 0.6, test_frac: 0.4, folds: 4}
+  montecarlo: {runs: 1000, ruin_drawdown: 0.5}
+  min_trades: 20
+  regime: {adx_period: 14, adx_trend_min: 20, vol_window: 20}
+score:
+  weights: {edge: 0.35, robustness: 0.25, regime: 0.20, recency: 0.20}
+  green_min: 65
+  yellow_min: 45
+optimize: {wf_efficiency_min: 0.5, min_trades: 20}
+portfolio: {max_correlation: 0.7, quality_min_score: 50, method: inverse_vol}
+memecoin_filters: {min_liquidity_usd: 50000, min_age_days: 30, min_volume_usd: 100000}

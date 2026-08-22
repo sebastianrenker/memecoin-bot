@@ -730,6 +730,7 @@ def _pick_db_path() -> str:
     default (TRADING_DB) is honoured as the initial selection.
     """
     candidates = {
+        "Validiert-Vorwärtstest (echte Kante-Prüfung)": os.path.join("cloud", "validated.db"),
         "Live-Paper (aktiv, echte 5m-Daten)": os.path.join("cloud", "live.db"),
         "CEX-Paper (echte ccxt-Daten)": os.path.join("cloud", "paper.db"),
         "On-Chain-Paper (echte GeckoTerminal-Daten)": os.path.join("cloud", "dex.db"),

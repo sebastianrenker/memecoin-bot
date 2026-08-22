@@ -37,7 +37,8 @@ def _load_combos(settings: Settings, active_path: str = "active_combos.yaml") ->
             data = yaml.safe_load(fh) or {}
         combos = []
         for c in data.get("combos", []):
-            combos.append(Combo(c["strategy"], c["symbol"], c.get("params", {}) or {}))
+            combos.append(Combo(c["strategy"], c["symbol"], c.get("params", {}) or {},
+                                timeframe=c.get("timeframe")))
         if combos:
             return combos
     # Fallback: universe x default strategies.

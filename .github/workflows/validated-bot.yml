@@ -1,0 +1,50 @@
+name: validated-bot
+
+# FORWARD-TEST der Walk-Forward-validierten Kombis (active_combos_validated.yaml).
+# Handelt sie ab jetzt vorwaerts auf echten Daten (1h & 4h) und committet
+# cloud/validated.db + VALIDATED_STATUS_REPORT.md. So zeigt sich ehrlich, ob die
+# Kante HAELT oder nur Vergangenheit war. Simuliertes Geld. Kein garantierter Profit.
+
+on:
+  schedule:
+    - cron: "8,38 * * * *"     # ~alle 30 Min, versetzt zu den anderen Loops
+  workflow_dispatch: {}
+
+concurrency:
+  group: validated-bot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    env:
+      TRADING_DB: cloud/validated.db
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Abhaengigkeiten installieren
+        run: pip install -r requirements-ci.txt
+      - name: Validated Paper-Tick (echte Daten, simuliertes Geld)
+        run: |
+          mkdir -p cloud
+          python cli.py --config config/config_validated.yaml ci-tick --active active_combos_validated.yaml --report VALIDATED_STATUS_REPORT.md
+      - name: Zustand zurueck committen
+        run: |
+          git config user.name "memecoin-bot"
+          git config user.email "memecoin-bot@users.noreply.github.com"
+          git add -f cloud/validated.db VALIDATED_STATUS_REPORT.md
+          if git diff --cached --quiet; then
+            echo "Keine Aenderung."
+          else
+            git commit -m "validated-bot: tick $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+            for i in 1 2 3 4 5; do
+              git pull --rebase --autostash origin ${GITHUB_REF_NAME} || true
+              if git push; then echo "pushed"; break; fi
+              echo "push race, retry $i"; sleep 5
+            done
+          fi

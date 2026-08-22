@@ -31,6 +31,7 @@ class Combo:
     strategy: str
     symbol: str
     params: Dict[str, Any]
+    timeframe: Optional[str] = None   # per-combo timeframe; falls back to config default
 
     @property
     def key(self) -> Tuple[str, str]:
@@ -78,15 +79,15 @@ class PaperTrader:
                       f"breaker={self.risk.breaker_tripped} kill={self.risk.kill_tripped}")
 
     # ---- helpers ---------------------------------------------------------
-    def _fetch_closed(self, symbol: str, now_ms: int) -> Optional[pd.DataFrame]:
+    def _fetch_closed(self, symbol: str, timeframe: str, now_ms: int) -> Optional[pd.DataFrame]:
         try:
-            raw = self.data.fetch_ohlcv(symbol, self.timeframe, self.lookback_days)
+            raw = self.data.fetch_ohlcv(symbol, timeframe, self.lookback_days)
         except DataUnavailable as e:
-            self.db.audit("warn", "data_skip", f"{symbol}: {e}")
+            self.db.audit("warn", "data_skip", f"{symbol} {timeframe}: {e}")
             return None
-        df = closed_bars(raw, self.timeframe, now_ms)
+        df = closed_bars(raw, timeframe, now_ms)
         if df is None or len(df) < 5:
-            self.db.audit("warn", "data_skip", f"{symbol}: too few closed bars")
+            self.db.audit("warn", "data_skip", f"{symbol} {timeframe}: too few closed bars")
             return None
         df.attrs["symbol"] = symbol
         return df
@@ -150,12 +151,14 @@ class PaperTrader:
 
         processed, skipped = 0, 0
         last_prices: Dict[Tuple[str, str], float] = {}
-        df_by_symbol: Dict[str, Optional[pd.DataFrame]] = {}  # fetch each symbol once per tick
+        df_cache: Dict[Tuple[str, str], Optional[pd.DataFrame]] = {}  # per (symbol, timeframe)
 
         for combo in self.combos:
-            if combo.symbol not in df_by_symbol:
-                df_by_symbol[combo.symbol] = self._fetch_closed(combo.symbol, now_ms)
-            df = df_by_symbol[combo.symbol]
+            tf = combo.timeframe or self.timeframe
+            ck = (combo.symbol, tf)
+            if ck not in df_cache:
+                df_cache[ck] = self._fetch_closed(combo.symbol, tf, now_ms)
+            df = df_cache[ck]
             if df is None:
                 skipped += 1
                 continue
