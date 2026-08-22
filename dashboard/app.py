@@ -22,7 +22,7 @@ import streamlit as st  # noqa: E402
 from persistence.db import Database  # noqa: E402
 
 READONLY = os.environ.get("CLOUD_READONLY", "0") == "1"
-DB_PATH = os.environ.get("TRADING_DB", os.path.join("cloud", "paper.db"))
+DB_PATH = os.environ.get("TRADING_DB", os.path.join("cloud", "live.db"))
 WATCHLIST_PATH = os.environ.get("WATCHLIST", "watchlist.yaml")
 
 _CSS = """
@@ -119,9 +119,11 @@ def _render_live(db: Database) -> None:
 
     # Live mark-to-market: override the stale last-tick equity with current prices
     # of the open positions, so the headline matches the per-coin live P&L.
+    # On Streamlit Cloud (READONLY) we skip browser-side price fetches — the exchange
+    # may be geo-blocked there; the CI bot already computed the equity we display.
     cash_meta = db.get_meta("cash")
     live = False
-    if positions and cash_meta is not None:
+    if positions and cash_meta is not None and not READONLY:
         try:
             live_unreal = 0.0
             for p in positions:
@@ -296,12 +298,14 @@ def _load_candles(symbol: str, timeframe: str, days: int):
     """Fetch real candles for a symbol (ccxt for CEX, GeckoTerminal for on-chain).
     Cached briefly so the charts don't hammer the APIs."""
     from core.utils import closed_bars
+    # Fail fast (max_retries=1): on Streamlit Cloud the exchange may be geo-blocked,
+    # and long retry/backoff would make the page look frozen.
     if ":" in symbol:
         from data.dex_source import DexSource
-        src = DexSource()
+        src = DexSource(max_retries=1, backoff_base_sec=0.5)
     else:
         from data.ccxt_source import CcxtSource
-        src = CcxtSource("binance")
+        src = CcxtSource("binance", max_retries=1, backoff_base_sec=0.5)
     raw = src.fetch_ohlcv(symbol, timeframe, days)
     df = closed_bars(raw, timeframe).tail(400).copy()
     df["time"] = pd.to_datetime(df["timestamp"], unit="ms")
@@ -375,6 +379,10 @@ def _render_all_charts(db_path: str) -> None:
     st.markdown("### Charts — Ein-/Ausstieg, Stop-Loss & Take-Profit pro Coin")
     st.caption("🟢 Kauf-Einstieg · 🔻 Verkauf · blaue Linie = Entry · rote gestrichelte = Stop-Loss · "
                "grüne gestrichelte = Take-Profit. Kerzen = echter Kurs.")
+    if READONLY:
+        st.info("Hinweis: In der Streamlit-Cloud sind Live-Kursabrufe evtl. blockiert "
+                "(Geo-Sperre der Börse). Falls Charts leer bleiben, nutze die Chart-Links "
+                "(DexScreener/Axiom) pro Coin oder starte das Dashboard lokal.")
     try:
         import altair  # noqa: F401
     except Exception as e:
@@ -742,22 +750,28 @@ def main() -> None:
                 "(`ci-tick` for CEX, `dex-bot`/config_dex for on-chain) first.")
     db = Database(db_path) if os.path.exists(db_path) else None
 
+    def _safe(fn):
+        try:
+            fn()
+        except Exception as e:  # never let one tab blank the whole app
+            st.error(f"Fehler in diesem Tab: {type(e).__name__}: {e}")
+
     tabs = st.tabs(["📈 Live", "🔎 Discover", "👁 Observe", "🏆 Ranking",
                     "🔬 Detail", "🗺 Heatmap", "📜 Audit"])
     with tabs[0]:
-        tab_live(db_path, auto, secs) if db else st.caption("No data yet.")
+        _safe(lambda: tab_live(db_path, auto, secs)) if db else st.caption("Noch keine Daten.")
     with tabs[1]:
-        tab_discover()
+        _safe(tab_discover)
     with tabs[2]:
-        tab_observe()
+        _safe(tab_observe)
     with tabs[3]:
-        tab_ranking(db) if db else st.caption("No data yet.")
+        _safe(lambda: tab_ranking(db)) if db else st.caption("Noch keine Daten.")
     with tabs[4]:
-        tab_detail(db) if db else st.caption("No data yet.")
+        _safe(lambda: tab_detail(db)) if db else st.caption("Noch keine Daten.")
     with tabs[5]:
-        tab_heatmap(db) if db else st.caption("No data yet.")
+        _safe(lambda: tab_heatmap(db)) if db else st.caption("Noch keine Daten.")
     with tabs[6]:
-        tab_audit(db) if db else st.caption("No data yet.")
+        _safe(lambda: tab_audit(db)) if db else st.caption("Noch keine Daten.")
     if db:
         db.close()
 
