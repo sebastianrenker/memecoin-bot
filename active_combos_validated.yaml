@@ -1,0 +1,73 @@
+combos:
+- strategy: ema_crossover
+  symbol: PEPE/USDT
+  timeframe: 1h
+  params:
+    fast: 20
+    slow: 40
+  wf_eff: 0.85
+  oos_trades: 21
+  oos_expR: 0.143
+- strategy: donchian_breakout
+  symbol: PEPE/USDT
+  timeframe: 1h
+  params:
+    entry: 40
+    exit: 10
+  wf_eff: 1.25
+  oos_trades: 17
+  oos_expR: 0.618
+- strategy: roc_momentum
+  symbol: PEPE/USDT
+  timeframe: 1h
+  params:
+    period: 14
+    threshold: 3.0
+  wf_eff: 0.97
+  oos_trades: 26
+  oos_expR: 0.145
+- strategy: roc_momentum
+  symbol: SHIB/USDT
+  timeframe: 4h
+  params:
+    period: 10
+    threshold: 3.0
+  wf_eff: 0.6
+  oos_trades: 28
+  oos_expR: 0.037
+- strategy: supertrend
+  symbol: PEPE/USDT
+  timeframe: 4h
+  params:
+    period: 7
+    mult: 2.0
+  wf_eff: 0.5
+  oos_trades: 19
+  oos_expR: 0.023
+- strategy: donchian_breakout
+  symbol: PEPE/USDT
+  timeframe: 4h
+  params:
+    entry: 20
+    exit: 20
+  wf_eff: 0.75
+  oos_trades: 21
+  oos_expR: 0.224
+- strategy: roc_momentum
+  symbol: WIF/USDT
+  timeframe: 4h
+  params:
+    period: 10
+    threshold: 6.0
+  wf_eff: 0.75
+  oos_trades: 45
+  oos_expR: 0.006
+- strategy: donchian_breakout
+  symbol: BONK/USDT
+  timeframe: 4h
+  params:
+    entry: 40
+    exit: 10
+  wf_eff: 1.25
+  oos_trades: 16
+  oos_expR: 0.153
