@@ -118,12 +118,11 @@ def _render_live(db: Database) -> None:
     unrealized = pnl_abs - realized
 
     # Live mark-to-market: override the stale last-tick equity with current prices
-    # of the open positions, so the headline matches the per-coin live P&L.
-    # On Streamlit Cloud (READONLY) we skip browser-side price fetches — the exchange
-    # may be geo-blocked there; the CI bot already computed the equity we display.
+    # of the open positions, so the headline matches the per-coin live P&L. Uses the
+    # multi-exchange fallback in _load_candles, so it also works on Streamlit Cloud.
     cash_meta = db.get_meta("cash")
     live = False
-    if positions and cash_meta is not None and not READONLY:
+    if positions and cash_meta is not None:
         try:
             live_unreal = 0.0
             for p in positions:
@@ -293,23 +292,42 @@ def _render_trade_analytics(trades) -> None:
         })
 
 
+# US-reachable exchanges tried in order. Binance is geo-blocked on Streamlit
+# Cloud (US); Kraken/KuCoin/OKX/Coinbase are reachable, so charts work there too.
+CEX_EXCHANGES = ["binance", "kraken", "kucoin", "okx", "coinbase"]
+
+
 @st.cache_data(ttl=120, show_spinner=False)
 def _load_candles(symbol: str, timeframe: str, days: int):
-    """Fetch real candles for a symbol (ccxt for CEX, GeckoTerminal for on-chain).
-    Cached briefly so the charts don't hammer the APIs."""
+    """Fetch real candles. On-chain via GeckoTerminal; CEX tries several
+    US-reachable exchanges so charts also render on Streamlit Cloud. Fail-fast
+    (max_retries=1) so a blocked exchange can't freeze the page. Cached 120s."""
     from core.utils import closed_bars
-    # Fail fast (max_retries=1): on Streamlit Cloud the exchange may be geo-blocked,
-    # and long retry/backoff would make the page look frozen.
+
+    def _finish(raw):
+        df = closed_bars(raw, timeframe).tail(400).copy()
+        df["time"] = pd.to_datetime(df["timestamp"], unit="ms")
+        return df
+
     if ":" in symbol:
         from data.dex_source import DexSource
-        src = DexSource(max_retries=1, backoff_base_sec=0.5)
-    else:
-        from data.ccxt_source import CcxtSource
-        src = CcxtSource("binance", max_retries=1, backoff_base_sec=0.5)
-    raw = src.fetch_ohlcv(symbol, timeframe, days)
-    df = closed_bars(raw, timeframe).tail(400).copy()
-    df["time"] = pd.to_datetime(df["timestamp"], unit="ms")
-    return df
+        return _finish(DexSource(max_retries=1, backoff_base_sec=0.5)
+                       .fetch_ohlcv(symbol, timeframe, days))
+
+    from data.ccxt_source import CcxtSource
+    base = symbol.split("/")[0]
+    variants = list(dict.fromkeys([symbol, f"{base}/USD", f"{base}/USDT"]))
+    last = None
+    for ex in CEX_EXCHANGES:
+        for sym in variants:
+            try:
+                raw = CcxtSource(ex, max_retries=1, backoff_base_sec=0.4).fetch_ohlcv(sym, timeframe, days)
+                if raw is not None and len(raw):
+                    return _finish(raw)
+            except Exception as e:
+                last = e
+                continue
+    raise last or RuntimeError(f"no candle source for {symbol}")
 
 
 def _twitter_link(symbol: str) -> str:
@@ -380,9 +398,8 @@ def _render_all_charts(db_path: str) -> None:
     st.caption("🟢 Kauf-Einstieg · 🔻 Verkauf · blaue Linie = Entry · rote gestrichelte = Stop-Loss · "
                "grüne gestrichelte = Take-Profit. Kerzen = echter Kurs.")
     if READONLY:
-        st.info("Hinweis: In der Streamlit-Cloud sind Live-Kursabrufe evtl. blockiert "
-                "(Geo-Sperre der Börse). Falls Charts leer bleiben, nutze die Chart-Links "
-                "(DexScreener/Axiom) pro Coin oder starte das Dashboard lokal.")
+        st.caption("Kurse via US-erreichbare Börsen (Binance→Kraken→KuCoin→OKX→Coinbase). "
+                   "Falls ein Coin dort nicht handelbar ist, nutze die Chart-Links pro Coin.")
     try:
         import altair  # noqa: F401
     except Exception as e:
