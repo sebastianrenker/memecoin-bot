@@ -60,6 +60,7 @@ optimize: {wf_efficiency_min: 0.5, min_trades: 20}
 portfolio: {max_correlation: 0.7, quality_min_score: 50, method: inverse_vol}
 memecoin_filters: {min_liquidity_usd: 50000, min_age_days: 30, min_volume_usd: 100000}
 
-# Trade-active set (trend + momentum + one mean-reversion) x 6 symbols = many combos.
+# Profit-oriented set: trend + breakout + momentum only. Mean-reversion is dropped
+# because on memecoins it is dangerous (dips are not discounts; trends run or collapse).
 active:
-  strategies: [ema_crossover, supertrend, donchian_breakout, macd_momentum, roc_momentum, rsi_mean_reversion]
+  strategies: [ema_crossover, supertrend, donchian_breakout, macd_momentum, roc_momentum]

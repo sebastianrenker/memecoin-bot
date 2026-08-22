@@ -209,6 +209,8 @@ class PaperTrader:
                  entry=p["entry"], stop=p["stop"], tp=p["tp"], opened_ts=p.get("opened_ts"),
                  risk=p["risk"], entry_fee=p["entry_fee"])
             for k, p in self.positions.items()])
+        if self.db.get_meta("initial_equity") is None:
+            self.db.set_meta("initial_equity", f"{self.cfg.initial_equity}")
         self.db.set_meta("cash", f"{self.cash}")
         self.db.set_meta("peak_equity", f"{self.risk.peak_equity}")
         self.db.set_meta("day_start_equity", f"{self.risk.day_start_equity}")

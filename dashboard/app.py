@@ -104,7 +104,8 @@ def _render_live(db: Database) -> None:
 
     # --- "Macht er Geld?" — the profit verdict (paper / theoretical) -------
     curve = db.equity_curve(20000)
-    start_eq = curve[0][1] if curve else 10000.0
+    _init = db.get_meta("initial_equity")
+    start_eq = float(_init) if _init else (curve[0][1] if curve else 10000.0)
     cur_eq = (eq if eq is not None else (curve[-1][1] if curve else start_eq))
     pnl_abs = cur_eq - start_eq
     pnl_pct = (pnl_abs / start_eq * 100.0) if start_eq else 0.0
@@ -137,16 +138,21 @@ def _render_live(db: Database) -> None:
     up = pnl_abs >= 0
     color = "#123d24" if up else "#3d1414"
     fg = "#5ee08a" if up else "#ff8a8a"
-    verdict = "✅ Macht Geld (Paper)" if pnl_abs > 0 else (
-        "➖ Bei ±0 (Paper)" if abs(pnl_abs) < 1e-9 else "🔻 Verliert Geld (Paper)")
+    head = ("✅ Du bist im PLUS (Paper)" if pnl_abs > 0 else
+            ("➖ Genau bei ±0 (Paper)" if abs(pnl_abs) < 1e-9 else "🔻 Du bist im MINUS (Paper)"))
+    livetag = "  · Live-Kurs" if live else "  · Stand letzter Tick"
     st.markdown(
-        f'<div style="background:{color};border:1px solid {fg}33;border-radius:14px;'
-        f'padding:14px 18px;margin:6px 0 12px">'
-        f'<div style="color:{fg};font-size:1.5rem;font-weight:800">{verdict} &nbsp; '
-        f'{pnl_abs:+,.2f} € &nbsp;<span style="font-size:1rem">({pnl_pct:+.2f}%)</span></div>'
+        f'<div style="background:{color};border:1px solid {fg}44;border-radius:16px;'
+        f'padding:18px 22px;margin:6px 0 14px">'
+        f'<div style="color:#c9d2e0;font-size:.9rem">Aus {start_eq:,.0f} € sind aktuell geworden{livetag}</div>'
+        f'<div style="color:{fg};font-size:2.4rem;font-weight:800;line-height:1.1">{cur_eq:,.2f} €</div>'
+        f'<div style="color:{fg};font-size:1.35rem;font-weight:800">{pnl_abs:+,.2f} €'
+        f'&nbsp;<span style="font-size:1rem">({pnl_pct:+.2f} %)</span></div>'
+        f'<div style="color:#e6e9ef;font-size:1.05rem;margin-top:8px;font-weight:700">{head}</div>'
         f'<div style="color:#c9d2e0;font-size:.82rem;margin-top:4px">'
-        f'Start {start_eq:,.2f} € → jetzt {cur_eq:,.2f} € · realisiert {realized:+,.2f} € · '
-        f'offen (unrealisiert) {unrealized:+,.2f} € · virtuelle €, simuliert, kein echtes Geld</div>'
+        f'Fest verbucht (abgeschlossene Trades): <b>{realized:+,.2f} €</b> · '
+        f'Noch offen (schwankt bis zum Verkauf): <b>{unrealized:+,.2f} €</b> · '
+        f'virtuelle €, simuliert, kein echtes Geld</div>'
         f'</div>', unsafe_allow_html=True)
 
     # KPIs
