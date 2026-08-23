@@ -1,19 +1,19 @@
-generated_ts: 1787443322082
+generated_ts: 1787456207440
 note: On-chain DEX paper-trading combos (simulated money). Short on-chain history
   means many will be skipped by the data checks - intended.
 combos:
 - strategy: donchian_breakout
-  symbol: solana:G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
+  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
   params: {}
-  token: CYBERLEEK
+  token: PUMP
 - strategy: supertrend
-  symbol: solana:G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
+  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
   params: {}
-  token: CYBERLEEK
+  token: PUMP
 - strategy: ema_crossover
-  symbol: solana:G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
+  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
   params: {}
-  token: CYBERLEEK
+  token: PUMP
 - strategy: donchian_breakout
   symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
   params: {}
@@ -27,17 +27,17 @@ combos:
   params: {}
   token: CATE
 - strategy: donchian_breakout
-  symbol: solana:9d9mb8kooFfaD3SctgZtkxQypkshx6ezhbKio89ixyy2
+  symbol: solana:G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
   params: {}
-  token: TRUMP
+  token: CYBERLEEK
 - strategy: supertrend
-  symbol: solana:9d9mb8kooFfaD3SctgZtkxQypkshx6ezhbKio89ixyy2
+  symbol: solana:G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
   params: {}
-  token: TRUMP
+  token: CYBERLEEK
 - strategy: ema_crossover
-  symbol: solana:9d9mb8kooFfaD3SctgZtkxQypkshx6ezhbKio89ixyy2
+  symbol: solana:G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
   params: {}
-  token: TRUMP
+  token: CYBERLEEK
 - strategy: donchian_breakout
   symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
   params: {}
@@ -51,17 +51,17 @@ combos:
   params: {}
   token: ANSEM
 - strategy: donchian_breakout
-  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
+  symbol: solana:9d9mb8kooFfaD3SctgZtkxQypkshx6ezhbKio89ixyy2
   params: {}
-  token: PUMP
+  token: TRUMP
 - strategy: supertrend
-  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
+  symbol: solana:9d9mb8kooFfaD3SctgZtkxQypkshx6ezhbKio89ixyy2
   params: {}
-  token: PUMP
+  token: TRUMP
 - strategy: ema_crossover
-  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
+  symbol: solana:9d9mb8kooFfaD3SctgZtkxQypkshx6ezhbKio89ixyy2
   params: {}
-  token: PUMP
+  token: TRUMP
 - strategy: donchian_breakout
   symbol: solana:4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
   params: {}
@@ -75,18 +75,6 @@ combos:
   params: {}
   token: TROLL
 - strategy: donchian_breakout
-  symbol: solana:6tMVLioTrzW65RWRAftNWPSf1JikYWRVsP87w9h9em2a
-  params: {}
-  token: PANTS
-- strategy: supertrend
-  symbol: solana:6tMVLioTrzW65RWRAftNWPSf1JikYWRVsP87w9h9em2a
-  params: {}
-  token: PANTS
-- strategy: ema_crossover
-  symbol: solana:6tMVLioTrzW65RWRAftNWPSf1JikYWRVsP87w9h9em2a
-  params: {}
-  token: PANTS
-- strategy: donchian_breakout
   symbol: solana:5PGhKctym6odbHGo2tKMST2AjmJsb2uZBQrKkn4ZuFT5
   params: {}
   token: Jimothy
@@ -99,17 +87,17 @@ combos:
   params: {}
   token: Jimothy
 - strategy: donchian_breakout
-  symbol: solana:BJFPiZ79ShxyBX59GHZ7p9R9DfQpKsm4xzu46MNMSHcZ
+  symbol: solana:CpoYFgaNA6MJRuJSGeXu9mPdghmtwd5RvYesgej4Zofj
   params: {}
-  token: BARRON
+  token: PURPE
 - strategy: supertrend
-  symbol: solana:BJFPiZ79ShxyBX59GHZ7p9R9DfQpKsm4xzu46MNMSHcZ
+  symbol: solana:CpoYFgaNA6MJRuJSGeXu9mPdghmtwd5RvYesgej4Zofj
   params: {}
-  token: BARRON
+  token: PURPE
 - strategy: ema_crossover
-  symbol: solana:BJFPiZ79ShxyBX59GHZ7p9R9DfQpKsm4xzu46MNMSHcZ
+  symbol: solana:CpoYFgaNA6MJRuJSGeXu9mPdghmtwd5RvYesgej4Zofj
   params: {}
-  token: BARRON
+  token: PURPE
 - strategy: donchian_breakout
   symbol: solana:Q2sPHPdUWFMg7M7wwrQKLrn619cAucfRsmhVJffodSp
   params: {}
@@ -123,17 +111,29 @@ combos:
   params: {}
   token: USELESS
 - strategy: donchian_breakout
-  symbol: solana:DPzKoJVewaH1wpchD3gWKeeGm7G2mXkBW48uRniAgbVx
+  symbol: solana:6tMVLioTrzW65RWRAftNWPSf1JikYWRVsP87w9h9em2a
   params: {}
-  token: Cupsey
+  token: PANTS
 - strategy: supertrend
-  symbol: solana:DPzKoJVewaH1wpchD3gWKeeGm7G2mXkBW48uRniAgbVx
+  symbol: solana:6tMVLioTrzW65RWRAftNWPSf1JikYWRVsP87w9h9em2a
   params: {}
-  token: Cupsey
+  token: PANTS
 - strategy: ema_crossover
-  symbol: solana:DPzKoJVewaH1wpchD3gWKeeGm7G2mXkBW48uRniAgbVx
+  symbol: solana:6tMVLioTrzW65RWRAftNWPSf1JikYWRVsP87w9h9em2a
   params: {}
-  token: Cupsey
+  token: PANTS
+- strategy: donchian_breakout
+  symbol: solana:BJFPiZ79ShxyBX59GHZ7p9R9DfQpKsm4xzu46MNMSHcZ
+  params: {}
+  token: BARRON
+- strategy: supertrend
+  symbol: solana:BJFPiZ79ShxyBX59GHZ7p9R9DfQpKsm4xzu46MNMSHcZ
+  params: {}
+  token: BARRON
+- strategy: ema_crossover
+  symbol: solana:BJFPiZ79ShxyBX59GHZ7p9R9DfQpKsm4xzu46MNMSHcZ
+  params: {}
+  token: BARRON
 - strategy: donchian_breakout
   symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
   params: {}
@@ -147,26 +147,26 @@ combos:
   params: {}
   token: PENGU
 - strategy: donchian_breakout
-  symbol: solana:2BQuidPwk81ZCSrDcZmPXjNdXUMMj74pjKV2ZqwoJhAe
+  symbol: solana:8ujpQXxnnWvRohU2oCe3eaSzoL7paU2uj3fEn4Zp72US
   params: {}
-  token: SOLCAT
+  token: Ani
 - strategy: supertrend
-  symbol: solana:2BQuidPwk81ZCSrDcZmPXjNdXUMMj74pjKV2ZqwoJhAe
+  symbol: solana:8ujpQXxnnWvRohU2oCe3eaSzoL7paU2uj3fEn4Zp72US
   params: {}
-  token: SOLCAT
+  token: Ani
 - strategy: ema_crossover
-  symbol: solana:2BQuidPwk81ZCSrDcZmPXjNdXUMMj74pjKV2ZqwoJhAe
+  symbol: solana:8ujpQXxnnWvRohU2oCe3eaSzoL7paU2uj3fEn4Zp72US
   params: {}
-  token: SOLCAT
+  token: Ani
 - strategy: donchian_breakout
-  symbol: solana:8ujpQXxnnWvRohU2oCe3eaSzoL7paU2uj3fEn4Zp72US
+  symbol: solana:2BQuidPwk81ZCSrDcZmPXjNdXUMMj74pjKV2ZqwoJhAe
   params: {}
-  token: Ani
+  token: SOLCAT
 - strategy: supertrend
-  symbol: solana:8ujpQXxnnWvRohU2oCe3eaSzoL7paU2uj3fEn4Zp72US
+  symbol: solana:2BQuidPwk81ZCSrDcZmPXjNdXUMMj74pjKV2ZqwoJhAe
   params: {}
-  token: Ani
+  token: SOLCAT
 - strategy: ema_crossover
-  symbol: solana:8ujpQXxnnWvRohU2oCe3eaSzoL7paU2uj3fEn4Zp72US
+  symbol: solana:2BQuidPwk81ZCSrDcZmPXjNdXUMMj74pjKV2ZqwoJhAe
   params: {}
-  token: Ani
+  token: SOLCAT
