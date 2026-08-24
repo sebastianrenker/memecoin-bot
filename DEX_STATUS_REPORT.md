@@ -2,12 +2,12 @@
 
 **Paper trading — simulated money only. Live trading is locked. Memecoins are extremely risky and mostly go to zero. This is not advice and not a prediction.**
 
-- Generated (UTC): 2026-08-24 16:18:37
+- Generated (UTC): 2026-08-24 18:03:13
 - Status: **running**
-- Equity (simulated): 9433.84
-- Cash: 9433.84
-- Open positions: 3
-- Combos processed / skipped: 21 / 15
+- Equity (simulated): 9428.93
+- Cash: 9432.19
+- Open positions: 4
+- Combos processed / skipped: 30 / 6
 - Circuit breaker: False  |  Kill switch: False
 
 ## Open positions
@@ -16,6 +16,7 @@
 | donchian_breakout | solana:Eb9qkfiSzKd185KdWLkZrMrejKEbA2ah2BK7spNmoPej | long | 7.818e+04 | 0.0057972 | 0.00451817 |
 | donchian_breakout | solana:DPzKoJVewaH1wpchD3gWKeeGm7G2mXkBW48uRniAgbVx | long | 1.864e+04 | 0.0199175 | 0.014553 |
 | supertrend | solana:9d9mb8kooFfaD3SctgZtkxQypkshx6ezhbKio89ixyy2 | long | 205.1 | 2.75562 | 2.29063 |
+| donchian_breakout | solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3 | long | 5609 | 0.0490252 | 0.0322048 |
 
 ## Last trades (simulated)
 | strategy | symbol | pnl | R | reason |
