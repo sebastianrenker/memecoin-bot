@@ -1,4 +1,4 @@
-generated_ts: 1787614877264
+generated_ts: 1787627642034
 note: On-chain DEX paper-trading combos (simulated money). Short on-chain history
   means many will be skipped by the data checks - intended.
 combos:
@@ -27,6 +27,18 @@ combos:
   params: {}
   token: CYBERLEEK
 - strategy: donchian_breakout
+  symbol: solana:8wA7x9EWDfvKikqrECmr3oMwLjmAqkS2CSjXw1PwS7dH
+  params: {}
+  token: Morty
+- strategy: supertrend
+  symbol: solana:8wA7x9EWDfvKikqrECmr3oMwLjmAqkS2CSjXw1PwS7dH
+  params: {}
+  token: Morty
+- strategy: ema_crossover
+  symbol: solana:8wA7x9EWDfvKikqrECmr3oMwLjmAqkS2CSjXw1PwS7dH
+  params: {}
+  token: Morty
+- strategy: donchian_breakout
   symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
   params: {}
   token: PUMP
@@ -51,29 +63,29 @@ combos:
   params: {}
   token: DOPAMEME
 - strategy: donchian_breakout
-  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
+  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
   params: {}
-  token: ANSEM
+  token: PENGU
 - strategy: supertrend
-  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
+  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
   params: {}
-  token: ANSEM
+  token: PENGU
 - strategy: ema_crossover
-  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
+  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
   params: {}
-  token: ANSEM
+  token: PENGU
 - strategy: donchian_breakout
-  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
+  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
   params: {}
-  token: PENGU
+  token: ANSEM
 - strategy: supertrend
-  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
+  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
   params: {}
-  token: PENGU
+  token: ANSEM
 - strategy: ema_crossover
-  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
+  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
   params: {}
-  token: PENGU
+  token: ANSEM
 - strategy: donchian_breakout
   symbol: solana:6a3A8ZpKMSsQQbFMJqZC6p9tfRAue9uLafQU9TXP2HLo
   params: {}
@@ -87,17 +99,17 @@ combos:
   params: {}
   token: cc
 - strategy: donchian_breakout
-  symbol: solana:Nx9dcwNs3iJxM5YAxshMHE4aYJHdDyyGMhVcmaSgfu8
+  symbol: solana:4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
   params: {}
-  token: TOAD
+  token: TROLL
 - strategy: supertrend
-  symbol: solana:Nx9dcwNs3iJxM5YAxshMHE4aYJHdDyyGMhVcmaSgfu8
+  symbol: solana:4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
   params: {}
-  token: TOAD
+  token: TROLL
 - strategy: ema_crossover
-  symbol: solana:Nx9dcwNs3iJxM5YAxshMHE4aYJHdDyyGMhVcmaSgfu8
+  symbol: solana:4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
   params: {}
-  token: TOAD
+  token: TROLL
 - strategy: donchian_breakout
   symbol: solana:6tMVLioTrzW65RWRAftNWPSf1JikYWRVsP87w9h9em2a
   params: {}
@@ -111,26 +123,26 @@ combos:
   params: {}
   token: PANTS
 - strategy: donchian_breakout
-  symbol: solana:FvsZohWNdVpSDQk4gCyU9YrkLRsfeEpSmzVUSQsjDaxG
+  symbol: solana:Nx9dcwNs3iJxM5YAxshMHE4aYJHdDyyGMhVcmaSgfu8
   params: {}
-  token: Dinger
+  token: TOAD
 - strategy: supertrend
-  symbol: solana:FvsZohWNdVpSDQk4gCyU9YrkLRsfeEpSmzVUSQsjDaxG
+  symbol: solana:Nx9dcwNs3iJxM5YAxshMHE4aYJHdDyyGMhVcmaSgfu8
   params: {}
-  token: Dinger
+  token: TOAD
 - strategy: ema_crossover
-  symbol: solana:FvsZohWNdVpSDQk4gCyU9YrkLRsfeEpSmzVUSQsjDaxG
+  symbol: solana:Nx9dcwNs3iJxM5YAxshMHE4aYJHdDyyGMhVcmaSgfu8
   params: {}
-  token: Dinger
+  token: TOAD
 - strategy: donchian_breakout
-  symbol: solana:4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
+  symbol: solana:FvsZohWNdVpSDQk4gCyU9YrkLRsfeEpSmzVUSQsjDaxG
   params: {}
-  token: TROLL
+  token: Dinger
 - strategy: supertrend
-  symbol: solana:4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
+  symbol: solana:FvsZohWNdVpSDQk4gCyU9YrkLRsfeEpSmzVUSQsjDaxG
   params: {}
-  token: TROLL
+  token: Dinger
 - strategy: ema_crossover
-  symbol: solana:4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
+  symbol: solana:FvsZohWNdVpSDQk4gCyU9YrkLRsfeEpSmzVUSQsjDaxG
   params: {}
-  token: TROLL
+  token: Dinger
