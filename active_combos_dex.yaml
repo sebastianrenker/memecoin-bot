@@ -1,4 +1,4 @@
-generated_ts: 1787659071750
+generated_ts: 1787671576358
 note: On-chain DEX paper-trading combos (simulated money). Short on-chain history
   means many will be skipped by the data checks - intended.
 combos:
@@ -27,54 +27,6 @@ combos:
   params: {}
   token: CATE
 - strategy: donchian_breakout
-  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
-  params: {}
-  token: PUMP
-- strategy: supertrend
-  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
-  params: {}
-  token: PUMP
-- strategy: ema_crossover
-  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
-  params: {}
-  token: PUMP
-- strategy: donchian_breakout
-  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
-  params: {}
-  token: ANSEM
-- strategy: supertrend
-  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
-  params: {}
-  token: ANSEM
-- strategy: ema_crossover
-  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
-  params: {}
-  token: ANSEM
-- strategy: donchian_breakout
-  symbol: solana:FmGbfThLpryD6irj9xwtoS4j7rRGnayuUmgHUNCBvxTr
-  params: {}
-  token: DOPAMEME
-- strategy: supertrend
-  symbol: solana:FmGbfThLpryD6irj9xwtoS4j7rRGnayuUmgHUNCBvxTr
-  params: {}
-  token: DOPAMEME
-- strategy: ema_crossover
-  symbol: solana:FmGbfThLpryD6irj9xwtoS4j7rRGnayuUmgHUNCBvxTr
-  params: {}
-  token: DOPAMEME
-- strategy: donchian_breakout
-  symbol: solana:8wA7x9EWDfvKikqrECmr3oMwLjmAqkS2CSjXw1PwS7dH
-  params: {}
-  token: Morty
-- strategy: supertrend
-  symbol: solana:8wA7x9EWDfvKikqrECmr3oMwLjmAqkS2CSjXw1PwS7dH
-  params: {}
-  token: Morty
-- strategy: ema_crossover
-  symbol: solana:8wA7x9EWDfvKikqrECmr3oMwLjmAqkS2CSjXw1PwS7dH
-  params: {}
-  token: Morty
-- strategy: donchian_breakout
   symbol: solana:5PGhKctym6odbHGo2tKMST2AjmJsb2uZBQrKkn4ZuFT5
   params: {}
   token: Jimothy
@@ -99,6 +51,30 @@ combos:
   params: {}
   token: PENGU
 - strategy: donchian_breakout
+  symbol: solana:8wA7x9EWDfvKikqrECmr3oMwLjmAqkS2CSjXw1PwS7dH
+  params: {}
+  token: Morty
+- strategy: supertrend
+  symbol: solana:8wA7x9EWDfvKikqrECmr3oMwLjmAqkS2CSjXw1PwS7dH
+  params: {}
+  token: Morty
+- strategy: ema_crossover
+  symbol: solana:8wA7x9EWDfvKikqrECmr3oMwLjmAqkS2CSjXw1PwS7dH
+  params: {}
+  token: Morty
+- strategy: donchian_breakout
+  symbol: solana:GEF9WdZj9UzsMnNViGiRFqMYtxzHNQF5kwts9eMYHh6d
+  params: {}
+  token: TINY
+- strategy: supertrend
+  symbol: solana:GEF9WdZj9UzsMnNViGiRFqMYtxzHNQF5kwts9eMYHh6d
+  params: {}
+  token: TINY
+- strategy: ema_crossover
+  symbol: solana:GEF9WdZj9UzsMnNViGiRFqMYtxzHNQF5kwts9eMYHh6d
+  params: {}
+  token: TINY
+- strategy: donchian_breakout
   symbol: solana:4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
   params: {}
   token: TROLL
@@ -111,6 +87,18 @@ combos:
   params: {}
   token: TROLL
 - strategy: donchian_breakout
+  symbol: solana:FRhB8L7Y9Qq41qZXYLtC2nw8An1RJfLLxRF2x9RwLLMo
+  params: {}
+  token: POPCAT
+- strategy: supertrend
+  symbol: solana:FRhB8L7Y9Qq41qZXYLtC2nw8An1RJfLLxRF2x9RwLLMo
+  params: {}
+  token: POPCAT
+- strategy: ema_crossover
+  symbol: solana:FRhB8L7Y9Qq41qZXYLtC2nw8An1RJfLLxRF2x9RwLLMo
+  params: {}
+  token: POPCAT
+- strategy: donchian_breakout
   symbol: solana:6E8U1HUdov2d1zqRbthb1myRBxxGnHF6XBaHHJVGNS2E
   params: {}
   token: BATON
@@ -122,3 +110,27 @@ combos:
   symbol: solana:6E8U1HUdov2d1zqRbthb1myRBxxGnHF6XBaHHJVGNS2E
   params: {}
   token: BATON
+- strategy: donchian_breakout
+  symbol: solana:3HmXpoWkYxUmGT1i66NAFtrxGGM4w7Z9TG8TdZ9YUDy4
+  params: {}
+  token: Buddy
+- strategy: supertrend
+  symbol: solana:3HmXpoWkYxUmGT1i66NAFtrxGGM4w7Z9TG8TdZ9YUDy4
+  params: {}
+  token: Buddy
+- strategy: ema_crossover
+  symbol: solana:3HmXpoWkYxUmGT1i66NAFtrxGGM4w7Z9TG8TdZ9YUDy4
+  params: {}
+  token: Buddy
+- strategy: donchian_breakout
+  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
+  params: {}
+  token: ANSEM
+- strategy: supertrend
+  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
+  params: {}
+  token: ANSEM
+- strategy: ema_crossover
+  symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
+  params: {}
+  token: ANSEM
