@@ -792,6 +792,9 @@ def main() -> None:
         _safe(lambda: tab_audit(db)) if db else st.caption("Noch keine Daten.")
     if db:
         db.close()
+    st.divider()
+    st.caption("© 2026 Sebastian Renker · MIT-Lizenz · "
+               "github.com/sebastianrenker/memecoin-bot")
 
 
 if __name__ == "__main__":
