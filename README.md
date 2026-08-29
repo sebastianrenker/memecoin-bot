@@ -1,5 +1,14 @@
 # Memecoin Paper-Trading Analysis Tool
 
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.11%2B-blue)
+![Mode](https://img.shields.io/badge/mode-paper--only-orange)
+![Live trading](https://img.shields.io/badge/live%20trading-locked-red)
+
+> A learning and analysis tool for memecoin strategies — real data, honest backtests, simulated money only.
+
+## Overview
+
 A **learning and analysis** tool for memecoin trading strategies that trades
 **simulated money only**. It fetches **real** market data, backtests strategies
 honestly (no look-ahead), validates them (walk-forward + Monte-Carlo + regime),
@@ -11,38 +20,32 @@ and paper-trades them continuously with strict risk controls.
 > zero, rugpulls are common, liquidity is thin and slippage is high. A positive
 > short-term paper result is almost always **noise**, not an edge.
 
-## What it does
+This tool quantifies **risk** and describes **past simulated behaviour**. It does
+**not** predict the future and there is **no "guaranteed profitable" switch**.
 
-- **Real data only** (`data.require_real: true`). CEX-listed memecoins via
-  [ccxt](https://github.com/ccxt/ccxt) (real OHLCV) first; an optional on-chain
-  DEX adapter (GeckoTerminal) second. If data can't be fetched, the combination
-  is **skipped — never faked**.
+## Features
+
+- **Real data only** (`data.require_real: true`) via [ccxt](https://github.com/ccxt/ccxt)
+  (real OHLCV) and an optional on-chain DEX adapter (GeckoTerminal). If data can't
+  be fetched, the combination is **skipped — never faked**.
 - **Honest backtest engine**: signal on bar *t* executes at the **open of t+1**
-  (no look-ahead); stop checked **before** take-profit; fees + slippage per side;
-  leverage capped with the entry fee recomputed on the capped size; too-tight
-  stops **rejected** (not widened); bar debounce after exits.
-- **Validation**: walk-forward (params fit on train, scored OOS only),
-  Monte-Carlo bootstrap (confidence interval + ruin probability), regime
-  analysis (ADX/volatility), and a transparent **"works-now" score** (Edge +
-  Robustness + Regime + Recency × confidence, with a traffic light and warnings).
-- **15 strategies**, indicators implemented from scratch (pandas/numpy):
-  `ema_crossover, supertrend, donchian_breakout, dmi_trend, macd_momentum,
-  roc_momentum, bollinger_breakout, keltner_pullback, opening_range_breakout,
-  rsi_mean_reversion, connors_rsi2, stochastic_reversion, williams_r_reversion,
-  cci_reversion, support_resistance`. Mean-reversion is **down-weighted** for
-  memecoins by design.
-- **Risk management**: 1% risk/trade, max open positions, **daily-loss circuit
-  breaker** (safe-hold, auto-resets next UTC day — does *not* kill the process),
-  **total-drawdown kill switch** (manual reset), mandatory stops, min stop
-  distance, one position per (strategy, symbol).
-- **Persistence & operations**: SQLite (WAL) with full **state recovery** on
-  restart; a controllable `serve` loop with double-start protection and an
-  adjustment thread on its own DB connection.
-- **Dashboard**: Streamlit app with paper/risk banners, kill switch, equity
-  curve, candle chart with trade markers, ranking, detail, portfolio, heatmap
-  and audit log. Read-only cloud mode (`CLOUD_READONLY=1`).
-- **Free cloud deploy**: GitHub Actions cron runs `ci-tick` and commits state;
-  Streamlit Community Cloud hosts a public read-only view.
+  (no look-ahead); stop before take-profit; fees + slippage per side; leverage
+  capped; too-tight stops rejected (not widened); bar debounce after exits.
+- **Validation**: walk-forward (OOS scoring), Monte-Carlo bootstrap (CI + ruin
+  probability), regime analysis, and a transparent **"works-now" score** with a
+  traffic light and warnings.
+- **15 strategies**, indicators implemented from scratch (pandas/numpy);
+  mean-reversion **down-weighted** for memecoins by design.
+- **Risk management**: 1% risk/trade, max open positions, daily-loss circuit
+  breaker, total-drawdown kill switch, mandatory stops, one position per (strategy, symbol).
+- **On-chain scan + rug filters**: live DexScreener data enriched with RugCheck /
+  GoPlus; rejects mint/freeze authority, unlocked LP, honeypots, holder
+  concentration, dust liquidity, brand-new launches. **Attention ≠ prediction.**
+- **Local, transparent advisor** (`advise`): turns the bot's own numbers into
+  `avoid` / `watch` / `paper_consider` — never a real-money order; a failed rug
+  check overrides everything.
+- **Persistence & ops**: SQLite (WAL) with full state recovery; controllable
+  `serve` loop; Streamlit dashboard; free cloud deploy via GitHub Actions.
 
 ## Architecture
 
@@ -66,77 +69,34 @@ tests/       pytest suite (engine correctness, risk fixes, safety, data, ...)
 
 ```bash
 pip install -r requirements.txt
-python cli.py doctor            # self-test
-python cli.py doctor --data     # also test a real data fetch
+python cli.py doctor            # self-test  (--data also tests a real fetch)
 python cli.py backtest --strategy supertrend --symbol DOGE/USDT
 python cli.py rank --db --limit 40           # evaluate & rank on real data
 python cli.py export-active --min-score 55   # write active_combos.yaml
 python cli.py serve                          # paper-trade continuously
 streamlit run dashboard/app.py               # dashboard
-pytest -q                                    # tests
 ```
 
-Windows users can just run `START.bat`.
-
-## On-chain signals & rug filters (new)
+On-chain scanning, paper self-trading and the offline advisor:
 
 ```bash
-python cli.py scan --limit 25            # rank active on-chain memecoins by ATTENTION
-python cli.py scan --tradeable-only      # only tokens that pass the rug filters
-```
-
-`scan` pulls live DexScreener data, enriches it with **RugCheck** / **GoPlus**
-security checks, and writes `watchlist.yaml`. Two honesty rules are baked in:
-
-- **Attention ≠ prediction.** The score ranks how much activity a token has
-  *right now*. By the time a coin trends, you're usually late. Most trending
-  tokens **fail** the rug filters — that's the honest reality, not a bug.
-- **Rug filters** reject: live mint/freeze authority, unlocked LP, honeypots,
-  extreme holder concentration, insider bundling, dust liquidity, dead volume,
-  brand-new launches, and high RugCheck risk scores. Unknown data is never
-  treated as a pass or a fail.
-
-The dashboard's **Signals** tab shows the watchlist with one-click links to
-verify each token on RugCheck / GMGN / Axiom. The **Observe** tab explains how
-to *watch* the same tokens on Axiom and practice with **MockApe** (a paper-trading
-overlay for Axiom/GMGN) — the bot itself stays paper-only and never routes orders
-anywhere. See [`RECHERCHE_MEMECOIN.md`](RECHERCHE_MEMECOIN.md) for the sourced
-research behind all of this.
-
-## On-chain self-trading (paper) + a free local advisor
-
-Let the bot **paper-trade the filtered on-chain tokens itself**, on real
-GeckoTerminal candles:
-
-```bash
-python cli.py scan --tradeable-only                 # only tokens passing rug filters
+python cli.py scan --tradeable-only          # only tokens passing rug filters
 python cli.py dex-combos --out active_combos_dex.yaml
-python cli.py --config config/config_dex.yaml serve --active active_combos_dex.yaml
+python cli.py advise                         # deterministic, offline
+python cli.py advise --ollama                # optional: phrase via a FREE local Ollama model
 ```
 
-The `dex-bot` GitHub Actions workflow does this automatically in the cloud
-(separate `cloud/dex.db` + `DEX_STATUS_REPORT.md`). Honest caveat: on-chain
-history is short, so **many tokens are correctly skipped** by the data checks.
+Windows users can just run `START.bat`. Further docs:
+[`ANLEITUNG.md`](ANLEITUNG.md) (Deutsch), [`SECURITY.md`](SECURITY.md),
+[`DEPLOY_GRATIS.md`](DEPLOY_GRATIS.md), [`AUDIT_BERICHT.md`](AUDIT_BERICHT.md),
+[`RECHERCHE_MEMECOIN.md`](RECHERCHE_MEMECOIN.md).
 
-**The "AI".** There is no free (or paid) AI that reliably trades memecoins
-profitably — anything sold as such is hype or a scam. Instead there's a free,
-**local, transparent advisor** that turns the bot's *own* numbers (score + rug
-verdict + attention) into a plain recommendation with reasons:
+## Tests
 
 ```bash
-python cli.py advise                 # deterministic, offline
-python cli.py advise --ollama        # optional: phrase it via a FREE local Ollama model
+pytest -q
 ```
 
-It only ever recommends `avoid` / `watch` / `paper_consider` — never a real-money
-order, and a failed rug check always overrides everything.
+## License
 
-## Honest expectations
-
-This tool quantifies **risk** and describes **past simulated behaviour**. It does
-**not** predict the future and there is **no "guaranteed profitable" switch** —
-that does not exist. Diversification lowers drawdown; it does not manufacture
-winners. Most memecoins go to zero; treat every green light with suspicion.
-
-See [`ANLEITUNG.md`](ANLEITUNG.md) (Deutsch), [`SECURITY.md`](SECURITY.md),
-[`DEPLOY_GRATIS.md`](DEPLOY_GRATIS.md), and [`AUDIT_BERICHT.md`](AUDIT_BERICHT.md).
+MIT — see [`LICENSE`](LICENSE). © 2026 Sebastian Renker.
