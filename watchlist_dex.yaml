@@ -1,31 +1,68 @@
-generated_ts: 1788187654596
+generated_ts: 1788191247693
 disclaimer: Attention = current activity, NOT a prediction. Most memecoins go to zero.
   Verify on RugCheck/GMGN/Axiom. This tool never places real orders.
 tokens:
-- symbol: fone
-  mint: CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump
+- symbol: ANSEM
+  mint: 9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump
   chain: solana
-  attention: 87.1
+  attention: 51.1
   tradeable: true
   risk:
     passed: true
     reasons: []
     checked: 3
   features:
-    liquidity_usd: 799988.0125
-    volume_24h_usd: 16073887.3792617
-    volume_5m_usd: 22176.8261860169
-    price_change_1h: -7.567
-    price_change_6h: -17.058
-    price_change_24h: -11.743
-    price_usd: 0.022471280157693358
-    fdv: 22242100.5889482
-    market_cap: 22242100.5889482
-    buys_5m: 69
-    sells_5m: 59
+    liquidity_usd: 2408425.0994
+    volume_24h_usd: 6212388.09310002
+    volume_5m_usd: 0.04843981301
+    price_change_1h: -2.705
+    price_change_6h: -6.17
+    price_change_24h: -21.005
+    price_usd: 0.27933046356178026
+    fdv: 278597647.435909
+    market_cap: 279314673.776903
+    buys_5m: 0
+    sells_5m: 1
     boosts: 0
     has_socials: false
-    age_hours: 110.7
+    age_hours: 1545.2
+    dex: meteora
+    feed: trending
+    pool_address: 6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
+  links:
+    dexscreener: https://www.geckoterminal.com/solana/pools/6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
+    rugcheck: https://rugcheck.xyz/tokens/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump
+    gmgn: https://gmgn.ai/sol/token/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump
+    axiom: https://axiom.trade/t/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump
+    birdeye: https://birdeye.so/token/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?chain=solana
+    x_search: https://x.com/search?q=%24ANSEM&f=live
+  note: Attention is a snapshot of current activity, NOT a price prediction. Most
+    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
+    real money.
+- symbol: fone
+  mint: CTPoyCwkjMvoJwU4xvZZqoD8tiYk6yDchySiN5gGpump
+  chain: solana
+  attention: 50.0
+  tradeable: true
+  risk:
+    passed: true
+    reasons: []
+    checked: 3
+  features:
+    liquidity_usd: 826471.2158
+    volume_24h_usd: 16067822.295222
+    volume_5m_usd: 0.0
+    price_change_1h: 6.644
+    price_change_6h: -14.169
+    price_change_24h: -11.783
+    price_usd: 0.023967154595354898
+    fdv: 23674949.5642515
+    market_cap: 23674949.5889631
+    buys_5m: 0
+    sells_5m: 0
+    boosts: 0
+    has_socials: false
+    age_hours: 111.7
     dex: pumpswap
     feed: trending
     pool_address: 3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
@@ -42,27 +79,27 @@ tokens:
 - symbol: CATE
   mint: Ai66LHZG9MCzg1WKdawwqduVAXpNDUuV8M3uyq5ppump
   chain: solana
-  attention: 86.6
+  attention: 50.0
   tradeable: true
   risk:
     passed: true
     reasons: []
     checked: 3
   features:
-    liquidity_usd: 2064384.0516
-    volume_24h_usd: 5411357.02292072
-    volume_5m_usd: 17509.52601884
-    price_change_1h: 3.916
-    price_change_6h: 16.535
-    price_change_24h: -6.136
-    price_usd: 0.0472028771528772
-    fdv: 45451450.2949954
-    market_cap: 45461525.7106391
-    buys_5m: 48
-    sells_5m: 32
+    liquidity_usd: 1995039.8157
+    volume_24h_usd: 5398462.97738509
+    volume_5m_usd: 0.0
+    price_change_1h: -7.348
+    price_change_6h: 4.076
+    price_change_24h: -10.428
+    price_usd: 0.04401972237874348
+    fdv: 42196534.9343453
+    market_cap: 42205888.8191043
+    buys_5m: 0
+    sells_5m: 0
     boosts: 0
     has_socials: false
-    age_hours: 862.2
+    age_hours: 863.2
     dex: pumpswap
     feed: trending
     pool_address: HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
@@ -76,178 +113,30 @@ tokens:
   note: Attention is a snapshot of current activity, NOT a price prediction. Most
     memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
     real money.
-- symbol: TJR
-  mint: 4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump
-  chain: solana
-  attention: 82.4
-  tradeable: true
-  risk:
-    passed: true
-    reasons: []
-    checked: 3
-  features:
-    liquidity_usd: 237004.9166
-    volume_24h_usd: 25151868.4966791
-    volume_5m_usd: 6655.5831603684
-    price_change_1h: -26.529
-    price_change_6h: -45.137
-    price_change_24h: 479.979
-    price_usd: 0.003268221363000691
-    fdv: 3223053.442
-    market_cap: 0.0
-    buys_5m: 34
-    sells_5m: 50
-    boosts: 0
-    has_socials: false
-    age_hours: 1513.6
-    dex: pumpswap
-    feed: trending
-    pool_address: Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
-  links:
-    dexscreener: https://www.geckoterminal.com/solana/pools/Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
-    rugcheck: https://rugcheck.xyz/tokens/4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump
-    gmgn: https://gmgn.ai/sol/token/4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump
-    axiom: https://axiom.trade/t/4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump
-    birdeye: https://birdeye.so/token/4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump?chain=solana
-    x_search: https://x.com/search?q=%24TJR&f=live
-  note: Attention is a snapshot of current activity, NOT a price prediction. Most
-    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
-    real money.
-- symbol: STONK
-  mint: 6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx
-  chain: solana
-  attention: 81.8
-  tradeable: true
-  risk:
-    passed: true
-    reasons: []
-    checked: 3
-  features:
-    liquidity_usd: 811713.6731
-    volume_24h_usd: 3360938.1839711
-    volume_5m_usd: 5120.706872226
-    price_change_1h: 5.465
-    price_change_6h: 1.764
-    price_change_24h: -16.904
-    price_usd: 0.020161892225882258
-    fdv: 18051789.4008518
-    market_cap: 18053848.3647989
-    buys_5m: 15
-    sells_5m: 6
-    boosts: 0
-    has_socials: false
-    age_hours: 616.7
-    dex: meteora
-    feed: trending
-    pool_address: 48M3tRdbVYmEbf5rCTFVAgqCCaZdChVmeg3VPBrmgT8m
-  links:
-    dexscreener: https://www.geckoterminal.com/solana/pools/48M3tRdbVYmEbf5rCTFVAgqCCaZdChVmeg3VPBrmgT8m
-    rugcheck: https://rugcheck.xyz/tokens/6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx
-    gmgn: https://gmgn.ai/sol/token/6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx
-    axiom: https://axiom.trade/t/6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx
-    birdeye: https://birdeye.so/token/6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx?chain=solana
-    x_search: https://x.com/search?q=%24STONK&f=live
-  note: Attention is a snapshot of current activity, NOT a price prediction. Most
-    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
-    real money.
-- symbol: SKR
-  mint: SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3
-  chain: solana
-  attention: 81.7
-  tradeable: true
-  risk:
-    passed: true
-    reasons: []
-    checked: 3
-  features:
-    liquidity_usd: 855780.7778
-    volume_24h_usd: 2579128.58569195
-    volume_5m_usd: 12901.5449182328
-    price_change_1h: 4.355
-    price_change_6h: 31.395
-    price_change_24h: 92.966
-    price_usd: 0.030148177514547146
-    fdv: 320142478.158599
-    market_cap: 210988551.008703
-    buys_5m: 23
-    sells_5m: 65
-    boosts: 0
-    has_socials: false
-    age_hours: 5347.4
-    dex: orca
-    feed: trending
-    pool_address: VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
-  links:
-    dexscreener: https://www.geckoterminal.com/solana/pools/VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
-    rugcheck: https://rugcheck.xyz/tokens/SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3
-    gmgn: https://gmgn.ai/sol/token/SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3
-    axiom: https://axiom.trade/t/SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3
-    birdeye: https://birdeye.so/token/SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3?chain=solana
-    x_search: https://x.com/search?q=%24SKR&f=live
-  note: Attention is a snapshot of current activity, NOT a price prediction. Most
-    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
-    real money.
-- symbol: ANSEM
-  mint: 9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump
-  chain: solana
-  attention: 81.6
-  tradeable: true
-  risk:
-    passed: true
-    reasons: []
-    checked: 3
-  features:
-    liquidity_usd: 2431232.2482
-    volume_24h_usd: 5551746.25607331
-    volume_5m_usd: 3065.0630871739
-    price_change_1h: -2.626
-    price_change_6h: -4.008
-    price_change_24h: -19.536
-    price_usd: 0.2868653187789985
-    fdv: 286344500.211807
-    market_cap: 287081464.215663
-    buys_5m: 8
-    sells_5m: 1
-    boosts: 0
-    has_socials: false
-    age_hours: 1544.2
-    dex: meteora
-    feed: trending
-    pool_address: 6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
-  links:
-    dexscreener: https://www.geckoterminal.com/solana/pools/6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
-    rugcheck: https://rugcheck.xyz/tokens/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump
-    gmgn: https://gmgn.ai/sol/token/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump
-    axiom: https://axiom.trade/t/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump
-    birdeye: https://birdeye.so/token/9cRCn9rGT8V2imeM2BaKs13yhMEais3ruM3rPvTGpump?chain=solana
-    x_search: https://x.com/search?q=%24ANSEM&f=live
-  note: Attention is a snapshot of current activity, NOT a price prediction. Most
-    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
-    real money.
 - symbol: HNT
   mint: hntyVP6YFm1Hg25TN9WGLqM12b8TQmcknKrdu1oxWux
   chain: solana
-  attention: 80.2
+  attention: 50.0
   tradeable: true
   risk:
     passed: true
     reasons: []
     checked: 3
   features:
-    liquidity_usd: 866935.1616
-    volume_24h_usd: 5636419.15819754
-    volume_5m_usd: 6104.3853801463
-    price_change_1h: -3.345
-    price_change_6h: -7.849
-    price_change_24h: -8.808
-    price_usd: 0.6983757276305715
-    fdv: 131319375.925412
-    market_cap: 131319402.608017
-    buys_5m: 12
-    sells_5m: 32
+    liquidity_usd: 846320.9561
+    volume_24h_usd: 5185446.12110183
+    volume_5m_usd: 0.0
+    price_change_1h: -0.352
+    price_change_6h: -2.071
+    price_change_24h: -28.301
+    price_usd: 0.6861372895673268
+    fdv: 127905696.112614
+    market_cap: 127905716.871491
+    buys_5m: 0
+    sells_5m: 0
     boosts: 0
     has_socials: false
-    age_hours: 29445.1
+    age_hours: 29446.1
     dex: raydium
     feed: trending
     pool_address: 91axdGmMoqQQg2MPUXKxT3bdqX4p2RMLXqZSQgXn2JpM
@@ -261,67 +150,141 @@ tokens:
   note: Attention is a snapshot of current activity, NOT a price prediction. Most
     memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
     real money.
-- symbol: moonkey
-  mint: BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump
+- symbol: STONK
+  mint: 6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx
   chain: solana
-  attention: 76.8
+  attention: 49.3
   tradeable: true
   risk:
     passed: true
     reasons: []
     checked: 3
   features:
-    liquidity_usd: 76102.7691
-    volume_24h_usd: 598194.957008659
-    volume_5m_usd: 5163.9206211129
-    price_change_1h: 1.975
-    price_change_6h: -3.506
-    price_change_24h: -27.238
-    price_usd: 0.0005069194161596717
-    fdv: 489448.210842996
-    market_cap: 489448.210842996
-    buys_5m: 25
-    sells_5m: 17
+    liquidity_usd: 812411.8152
+    volume_24h_usd: 3456379.2304857
+    volume_5m_usd: 0.0
+    price_change_1h: -2.195
+    price_change_6h: -7.272
+    price_change_24h: -15.644
+    price_usd: 0.019566463137491205
+    fdv: 17722428.1431556
+    market_cap: 17726222.7477514
+    buys_5m: 0
+    sells_5m: 0
     boosts: 0
     has_socials: false
-    age_hours: 86.0
+    age_hours: 617.7
+    dex: meteora
+    feed: trending
+    pool_address: 48M3tRdbVYmEbf5rCTFVAgqCCaZdChVmeg3VPBrmgT8m
+  links:
+    dexscreener: https://www.geckoterminal.com/solana/pools/48M3tRdbVYmEbf5rCTFVAgqCCaZdChVmeg3VPBrmgT8m
+    rugcheck: https://rugcheck.xyz/tokens/6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx
+    gmgn: https://gmgn.ai/sol/token/6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx
+    axiom: https://axiom.trade/t/6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx
+    birdeye: https://birdeye.so/token/6GmAFSYs4gk3FDao5FzzySQpPZaWsa4rUJHacpMpUNgx?chain=solana
+    x_search: https://x.com/search?q=%24STONK&f=live
+  note: Attention is a snapshot of current activity, NOT a price prediction. Most
+    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
+    real money.
+- symbol: TJR
+  mint: 4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump
+  chain: solana
+  attention: 49.1
+  tradeable: true
+  risk:
+    passed: true
+    reasons: []
+    checked: 3
+  features:
+    liquidity_usd: 233112.938
+    volume_24h_usd: 25274994.974107
+    volume_5m_usd: 0.0
+    price_change_1h: 0.667
+    price_change_6h: -34.346
+    price_change_24h: 484.439
+    price_usd: 0.0031679417500519013
+    fdv: 3173902.047
+    market_cap: 0.0
+    buys_5m: 0
+    sells_5m: 0
+    boosts: 0
+    has_socials: false
+    age_hours: 1514.6
     dex: pumpswap
     feed: trending
-    pool_address: D5ZQf8GFSDxDKo3t3gejCfnrTMttU16Dv2BHK3TNYatp
+    pool_address: Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
   links:
-    dexscreener: https://www.geckoterminal.com/solana/pools/D5ZQf8GFSDxDKo3t3gejCfnrTMttU16Dv2BHK3TNYatp
-    rugcheck: https://rugcheck.xyz/tokens/BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump
-    gmgn: https://gmgn.ai/sol/token/BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump
-    axiom: https://axiom.trade/t/BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump
-    birdeye: https://birdeye.so/token/BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump?chain=solana
-    x_search: https://x.com/search?q=%24moonkey&f=live
+    dexscreener: https://www.geckoterminal.com/solana/pools/Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
+    rugcheck: https://rugcheck.xyz/tokens/4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump
+    gmgn: https://gmgn.ai/sol/token/4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump
+    axiom: https://axiom.trade/t/4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump
+    birdeye: https://birdeye.so/token/4U4U8oXwDyVXGeTffMXds4NAgBgLFwq3wNvTCRTSpump?chain=solana
+    x_search: https://x.com/search?q=%24TJR&f=live
+  note: Attention is a snapshot of current activity, NOT a price prediction. Most
+    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
+    real money.
+- symbol: SKR
+  mint: SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3
+  chain: solana
+  attention: 48.7
+  tradeable: true
+  risk:
+    passed: true
+    reasons: []
+    checked: 3
+  features:
+    liquidity_usd: 859912.3152
+    volume_24h_usd: 2627081.64633295
+    volume_5m_usd: 0.0
+    price_change_1h: 2.555
+    price_change_6h: 35.031
+    price_change_24h: 86.063
+    price_usd: 0.030943203763635477
+    fdv: 326812696.418394
+    market_cap: 215384529.253306
+    buys_5m: 0
+    sells_5m: 0
+    boosts: 0
+    has_socials: false
+    age_hours: 5348.4
+    dex: orca
+    feed: trending
+    pool_address: VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
+  links:
+    dexscreener: https://www.geckoterminal.com/solana/pools/VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
+    rugcheck: https://rugcheck.xyz/tokens/SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3
+    gmgn: https://gmgn.ai/sol/token/SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3
+    axiom: https://axiom.trade/t/SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3
+    birdeye: https://birdeye.so/token/SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3?chain=solana
+    x_search: https://x.com/search?q=%24SKR&f=live
   note: Attention is a snapshot of current activity, NOT a price prediction. Most
     memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
     real money.
 - symbol: TROLL
   mint: 5UUH9RTDiSpq6HKS6bp4NdU9PNJpXRXuiw6ShBTBhgH2
   chain: solana
-  attention: 73.2
+  attention: 47.8
   tradeable: true
   risk:
     passed: true
     reasons: []
     checked: 3
   features:
-    liquidity_usd: 2986803.4815
-    volume_24h_usd: 1632982.23374312
-    volume_5m_usd: 1969.7693667964
-    price_change_1h: 1.356
-    price_change_6h: 0.191
-    price_change_24h: -12.849
-    price_usd: 0.04296332884111776
-    fdv: 42910465.2710439
-    market_cap: 42910465.2710439
-    buys_5m: 2
-    sells_5m: 2
+    liquidity_usd: 2989262.3265
+    volume_24h_usd: 1587400.69731488
+    volume_5m_usd: 0.0
+    price_change_1h: -0.195
+    price_change_6h: -1.491
+    price_change_24h: -16.421
+    price_usd: 0.04294404681613407
+    fdv: 42891206.9763096
+    market_cap: 42891206.9763096
+    buys_5m: 0
+    sells_5m: 0
     boosts: 0
     has_socials: false
-    age_hours: 11948.3
+    age_hours: 11949.3
     dex: pumpswap
     feed: trending
     pool_address: 4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
@@ -335,30 +298,67 @@ tokens:
   note: Attention is a snapshot of current activity, NOT a price prediction. Most
     memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
     real money.
-- symbol: OTC
-  mint: MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump
+- symbol: CYBERLEEK
+  mint: ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg
   chain: solana
-  attention: 72.8
+  attention: 45.6
   tradeable: true
   risk:
     passed: true
     reasons: []
     checked: 3
   features:
-    liquidity_usd: 133198.6279
-    volume_24h_usd: 1075863.5052653
-    volume_5m_usd: 1340.3760460435
-    price_change_1h: 13.638
-    price_change_6h: 17.75
-    price_change_24h: -17.971
-    price_usd: 0.0014305099261453025
-    fdv: 1067192.56393765
-    market_cap: 1070053.59103731
-    buys_5m: 10
-    sells_5m: 28
+    liquidity_usd: 416213.5775
+    volume_24h_usd: 576287.87720554
+    volume_5m_usd: 0.0
+    price_change_1h: -1.27
+    price_change_6h: -5.051
+    price_change_24h: -31.216
+    price_usd: 0.0016200062818124833
+    fdv: 1182515.37383899
+    market_cap: 1182515.3806312
+    buys_5m: 0
+    sells_5m: 0
     boosts: 0
     has_socials: false
-    age_hours: 73.2
+    age_hours: 378.7
+    dex: raydium
+    feed: trending
+    pool_address: G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
+  links:
+    dexscreener: https://www.geckoterminal.com/solana/pools/G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
+    rugcheck: https://rugcheck.xyz/tokens/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg
+    gmgn: https://gmgn.ai/sol/token/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg
+    axiom: https://axiom.trade/t/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg
+    birdeye: https://birdeye.so/token/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg?chain=solana
+    x_search: https://x.com/search?q=%24CYBERLEEK&f=live
+  note: Attention is a snapshot of current activity, NOT a price prediction. Most
+    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
+    real money.
+- symbol: OTC
+  mint: MukLDtJ8Cx9DxLbeyLRSWPSposTMWuwHANbuaudpump
+  chain: solana
+  attention: 45.1
+  tradeable: true
+  risk:
+    passed: true
+    reasons: []
+    checked: 3
+  features:
+    liquidity_usd: 123586.2593
+    volume_24h_usd: 925410.603846211
+    volume_5m_usd: 0.0
+    price_change_1h: -2.134
+    price_change_6h: 9.078
+    price_change_24h: -21.491
+    price_usd: 0.0012576130535094088
+    fdv: 937453.000165873
+    market_cap: 940722.843029125
+    buys_5m: 0
+    sells_5m: 0
+    boosts: 0
+    has_socials: false
+    age_hours: 74.2
     dex: pumpswap
     feed: trending
     pool_address: DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
@@ -372,30 +372,67 @@ tokens:
   note: Attention is a snapshot of current activity, NOT a price prediction. Most
     memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
     real money.
-- symbol: PENGU
-  mint: 2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv
+- symbol: moonkey
+  mint: BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump
   chain: solana
-  attention: 69.2
+  attention: 43.8
   tradeable: true
   risk:
     passed: true
     reasons: []
     checked: 3
   features:
-    liquidity_usd: 31356.8118
-    volume_24h_usd: 709276.542886627
-    volume_5m_usd: 311.3241534752
-    price_change_1h: 1.157
-    price_change_6h: 0.39
-    price_change_24h: -4.87
-    price_usd: 0.00877242069964566
-    fdv: 673045059.929818
-    market_cap: 551437839.870115
-    buys_5m: 2
+    liquidity_usd: 80803.7944
+    volume_24h_usd: 597345.551329433
+    volume_5m_usd: 0.0
+    price_change_1h: 18.459
+    price_change_6h: -18.983
+    price_change_24h: -25.876
+    price_usd: 0.0005804270045460072
+    fdv: 560470.139482976
+    market_cap: 560470.139482977
+    buys_5m: 0
     sells_5m: 0
     boosts: 0
     has_socials: false
-    age_hours: 1819.3
+    age_hours: 87.0
+    dex: pumpswap
+    feed: trending
+    pool_address: D5ZQf8GFSDxDKo3t3gejCfnrTMttU16Dv2BHK3TNYatp
+  links:
+    dexscreener: https://www.geckoterminal.com/solana/pools/D5ZQf8GFSDxDKo3t3gejCfnrTMttU16Dv2BHK3TNYatp
+    rugcheck: https://rugcheck.xyz/tokens/BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump
+    gmgn: https://gmgn.ai/sol/token/BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump
+    axiom: https://axiom.trade/t/BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump
+    birdeye: https://birdeye.so/token/BRZ5aeJCDuruA42V1CntqKvofa2G7DS3yyxx1pZEpump?chain=solana
+    x_search: https://x.com/search?q=%24moonkey&f=live
+  note: Attention is a snapshot of current activity, NOT a price prediction. Most
+    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
+    real money.
+- symbol: PENGU
+  mint: 2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv
+  chain: solana
+  attention: 43.1
+  tradeable: true
+  risk:
+    passed: true
+    reasons: []
+    checked: 3
+  features:
+    liquidity_usd: 31278.8906
+    volume_24h_usd: 738775.267150348
+    volume_5m_usd: 0.0
+    price_change_1h: -0.744
+    price_change_6h: -0.662
+    price_change_24h: -5.159
+    price_usd: 0.008693167142246
+    fdv: 667356157.222686
+    market_cap: 546776820.264118
+    buys_5m: 0
+    sells_5m: 0
+    boosts: 0
+    has_socials: false
+    age_hours: 1820.3
     dex: zerofi
     feed: trending
     pool_address: D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
@@ -406,43 +443,6 @@ tokens:
     axiom: https://axiom.trade/t/2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv
     birdeye: https://birdeye.so/token/2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv?chain=solana
     x_search: https://x.com/search?q=%24PENGU&f=live
-  note: Attention is a snapshot of current activity, NOT a price prediction. Most
-    memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
-    real money.
-- symbol: CYBERLEEK
-  mint: ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg
-  chain: solana
-  attention: 52.5
-  tradeable: true
-  risk:
-    passed: true
-    reasons: []
-    checked: 3
-  features:
-    liquidity_usd: 421471.6881
-    volume_24h_usd: 581988.031068022
-    volume_5m_usd: 1.0310687522
-    price_change_1h: 1.741
-    price_change_6h: -7.36
-    price_change_24h: -29.655
-    price_usd: 0.0016495794771587628
-    fdv: 1199039.15330229
-    market_cap: 1199039.16018941
-    buys_5m: 0
-    sells_5m: 2
-    boosts: 0
-    has_socials: false
-    age_hours: 377.7
-    dex: raydium
-    feed: trending
-    pool_address: G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
-  links:
-    dexscreener: https://www.geckoterminal.com/solana/pools/G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh
-    rugcheck: https://rugcheck.xyz/tokens/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg
-    gmgn: https://gmgn.ai/sol/token/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg
-    axiom: https://axiom.trade/t/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg
-    birdeye: https://birdeye.so/token/ApZuxdpzMrbEYTGEzeY9afh5pj9d6qPRJCTgQYiipbKg?chain=solana
-    x_search: https://x.com/search?q=%24CYBERLEEK&f=live
   note: Attention is a snapshot of current activity, NOT a price prediction. Most
     memecoins go to zero. Verify every token on RugCheck/GMGN before ever risking
     real money.
