@@ -1,8 +1,20 @@
-generated_ts: 1788191248110
+generated_ts: 1788194848122
 note: On-chain DEX paper-trading combos (simulated money). Short on-chain history
   means many will be skipped by the data checks - intended.
 combos:
 - strategy: donchian_breakout
+  symbol: solana:VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
+  params: {}
+  token: SKR
+- strategy: supertrend
+  symbol: solana:VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
+  params: {}
+  token: SKR
+- strategy: ema_crossover
+  symbol: solana:VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
+  params: {}
+  token: SKR
+- strategy: donchian_breakout
   symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
   params: {}
   token: ANSEM
@@ -27,29 +39,17 @@ combos:
   params: {}
   token: fone
 - strategy: donchian_breakout
-  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
+  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
   params: {}
-  token: CATE
+  token: OTC
 - strategy: supertrend
-  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
+  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
   params: {}
-  token: CATE
+  token: OTC
 - strategy: ema_crossover
-  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
+  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
   params: {}
-  token: CATE
-- strategy: donchian_breakout
-  symbol: solana:91axdGmMoqQQg2MPUXKxT3bdqX4p2RMLXqZSQgXn2JpM
-  params: {}
-  token: HNT
-- strategy: supertrend
-  symbol: solana:91axdGmMoqQQg2MPUXKxT3bdqX4p2RMLXqZSQgXn2JpM
-  params: {}
-  token: HNT
-- strategy: ema_crossover
-  symbol: solana:91axdGmMoqQQg2MPUXKxT3bdqX4p2RMLXqZSQgXn2JpM
-  params: {}
-  token: HNT
+  token: OTC
 - strategy: donchian_breakout
   symbol: solana:48M3tRdbVYmEbf5rCTFVAgqCCaZdChVmeg3VPBrmgT8m
   params: {}
@@ -62,30 +62,6 @@ combos:
   symbol: solana:48M3tRdbVYmEbf5rCTFVAgqCCaZdChVmeg3VPBrmgT8m
   params: {}
   token: STONK
-- strategy: donchian_breakout
-  symbol: solana:Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
-  params: {}
-  token: TJR
-- strategy: supertrend
-  symbol: solana:Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
-  params: {}
-  token: TJR
-- strategy: ema_crossover
-  symbol: solana:Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
-  params: {}
-  token: TJR
-- strategy: donchian_breakout
-  symbol: solana:VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
-  params: {}
-  token: SKR
-- strategy: supertrend
-  symbol: solana:VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
-  params: {}
-  token: SKR
-- strategy: ema_crossover
-  symbol: solana:VY1ZQXjqBwvuWgVfTfhqanJe96GGoQrX7xZZDrWPGiT
-  params: {}
-  token: SKR
 - strategy: donchian_breakout
   symbol: solana:4w2cysotX6czaUGmmWg13hDpY4QEMG2CzeKYEQyK9Ama
   params: {}
@@ -111,17 +87,17 @@ combos:
   params: {}
   token: CYBERLEEK
 - strategy: donchian_breakout
-  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
+  symbol: solana:91axdGmMoqQQg2MPUXKxT3bdqX4p2RMLXqZSQgXn2JpM
   params: {}
-  token: OTC
+  token: HNT
 - strategy: supertrend
-  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
+  symbol: solana:91axdGmMoqQQg2MPUXKxT3bdqX4p2RMLXqZSQgXn2JpM
   params: {}
-  token: OTC
+  token: HNT
 - strategy: ema_crossover
-  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
+  symbol: solana:91axdGmMoqQQg2MPUXKxT3bdqX4p2RMLXqZSQgXn2JpM
   params: {}
-  token: OTC
+  token: HNT
 - strategy: donchian_breakout
   symbol: solana:D5ZQf8GFSDxDKo3t3gejCfnrTMttU16Dv2BHK3TNYatp
   params: {}
@@ -134,6 +110,30 @@ combos:
   symbol: solana:D5ZQf8GFSDxDKo3t3gejCfnrTMttU16Dv2BHK3TNYatp
   params: {}
   token: moonkey
+- strategy: donchian_breakout
+  symbol: solana:Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
+  params: {}
+  token: TJR
+- strategy: supertrend
+  symbol: solana:Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
+  params: {}
+  token: TJR
+- strategy: ema_crossover
+  symbol: solana:Eg2SxQ3zkT3ZjQmnXg318aVUR8eo4YfUPUVzeU6riGJN
+  params: {}
+  token: TJR
+- strategy: donchian_breakout
+  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
+  params: {}
+  token: CATE
+- strategy: supertrend
+  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
+  params: {}
+  token: CATE
+- strategy: ema_crossover
+  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
+  params: {}
+  token: CATE
 - strategy: donchian_breakout
   symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
   params: {}
