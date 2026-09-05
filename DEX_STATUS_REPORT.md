@@ -2,12 +2,12 @@
 
 **Paper trading — simulated money only. Live trading is locked. Memecoins are extremely risky and mostly go to zero. This is not advice and not a prediction.**
 
-- Generated (UTC): 2026-09-05 17:49:14
+- Generated (UTC): 2026-09-05 18:52:02
 - Status: **running**
-- Equity (simulated): 9005.25
+- Equity (simulated): 9000.20
 - Cash: 9056.12
 - Open positions: 5
-- Combos processed / skipped: 30 / 18
+- Combos processed / skipped: 42 / 6
 - Circuit breaker: False  |  Kill switch: False
 
 ## Open positions
