@@ -2,12 +2,12 @@
 
 **Paper trading — simulated money only. Live trading is locked. Memecoins are extremely risky and mostly go to zero. This is not advice and not a prediction.**
 
-- Generated (UTC): 2026-09-05 01:49:36
+- Generated (UTC): 2026-09-05 02:50:02
 - Status: **running**
-- Equity (simulated): 8886.10
-- Cash: 8886.10
+- Equity (simulated): 9054.16
+- Cash: 9056.12
 - Open positions: 5
-- Combos processed / skipped: 18 / 21
+- Combos processed / skipped: 27 / 15
 - Circuit breaker: False  |  Kill switch: False
 
 ## Open positions
@@ -17,11 +17,12 @@
 | donchian_breakout | solana:DPzKoJVewaH1wpchD3gWKeeGm7G2mXkBW48uRniAgbVx | long | 1.864e+04 | 0.0199175 | 0.014553 |
 | supertrend | solana:9d9mb8kooFfaD3SctgZtkxQypkshx6ezhbKio89ixyy2 | long | 205.1 | 2.75562 | 2.29063 |
 | supertrend | solana:HwXhW242teXCCZEvruXsYJ5EyBJ2eZjmvVWtY4H8n69A | long | 2.707e+05 | 0.000574661 | 0.000231388 |
-| donchian_breakout | solana:6QyYdc6jgeKnfP1FWhiexMYq3JQ3sidSYoubjWUTo3rm | long | 1.323e+05 | 0.00149195 | 0.000820013 |
+| ema_crossover | solana:6QyYdc6jgeKnfP1FWhiexMYq3JQ3sidSYoubjWUTo3rm | long | 7.558e+04 | 0.00219439 | 0.00099599 |
 
 ## Last trades (simulated)
 | strategy | symbol | pnl | R | reason |
 |---|---|---|---|---|
+| donchian_breakout | solana:6QyYdc6jgeKnfP1FWhiexMYq3JQ3sidSYoubjWUTo3rm | 169.84 | 1.91 | take_profit |
 | ema_crossover | solana:48M3tRdbVYmEbf5rCTFVAgqCCaZdChVmeg3VPBrmgT8m | -63.19 | -0.71 | signal_exit |
 | supertrend | solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3 | -99.74 | -1.10 | stop |
 | donchian_breakout | solana:Q2sPHPdUWFMg7M7wwrQKLrn619cAucfRsmhVJffodSp | 156.19 | 1.76 | take_profit |
@@ -31,4 +32,3 @@
 | donchian_breakout | solana:3C5YE97HADPDxZehYq9Cis8AXr9aNyrUsczKzE1nDbW9 | -112.01 | -1.21 | stop |
 | ema_crossover | solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3 | -98.84 | -1.05 | stop |
 | donchian_breakout | solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3 | -43.26 | -0.46 | signal_exit |
-| donchian_breakout | solana:G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh | -100.44 | -1.05 | stop |
