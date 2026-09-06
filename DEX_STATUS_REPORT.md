@@ -2,12 +2,12 @@
 
 **Paper trading — simulated money only. Live trading is locked. Memecoins are extremely risky and mostly go to zero. This is not advice and not a prediction.**
 
-- Generated (UTC): 2026-09-06 14:49:39
+- Generated (UTC): 2026-09-06 15:49:36
 - Status: **running**
-- Equity (simulated): 8928.95
-- Cash: 8949.16
-- Open positions: 5
-- Combos processed / skipped: 36 / 6
+- Equity (simulated): 8816.19
+- Cash: 8816.19
+- Open positions: 4
+- Combos processed / skipped: 33 / 9
 - Circuit breaker: False  |  Kill switch: False
 
 ## Open positions
@@ -17,11 +17,11 @@
 | donchian_breakout | solana:DPzKoJVewaH1wpchD3gWKeeGm7G2mXkBW48uRniAgbVx | long | 1.864e+04 | 0.0199175 | 0.014553 |
 | supertrend | solana:9d9mb8kooFfaD3SctgZtkxQypkshx6ezhbKio89ixyy2 | long | 205.1 | 2.75562 | 2.29063 |
 | supertrend | solana:HwXhW242teXCCZEvruXsYJ5EyBJ2eZjmvVWtY4H8n69A | long | 2.707e+05 | 0.000574661 | 0.000231388 |
-| donchian_breakout | solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a | long | 2.833e+05 | 0.00884893 | 0.00853249 |
 
 ## Last trades (simulated)
 | strategy | symbol | pnl | R | reason |
 |---|---|---|---|---|
+| donchian_breakout | solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a | -148.02 | -1.65 | stop |
 | ema_crossover | solana:6QyYdc6jgeKnfP1FWhiexMYq3JQ3sidSYoubjWUTo3rm | -92.92 | -1.03 | stop |
 | donchian_breakout | solana:6QyYdc6jgeKnfP1FWhiexMYq3JQ3sidSYoubjWUTo3rm | 169.84 | 1.91 | take_profit |
 | ema_crossover | solana:48M3tRdbVYmEbf5rCTFVAgqCCaZdChVmeg3VPBrmgT8m | -63.19 | -0.71 | signal_exit |
@@ -31,4 +31,3 @@
 | donchian_breakout | solana:91axdGmMoqQQg2MPUXKxT3bdqX4p2RMLXqZSQgXn2JpM | -98.06 | -1.08 | stop |
 | donchian_breakout | solana:G8kgi7aUpeX8EVR8VMkrth9SKEv5BietWC33UjAiiMGh | -94.43 | -1.03 | signal_exit |
 | donchian_breakout | solana:3C5YE97HADPDxZehYq9Cis8AXr9aNyrUsczKzE1nDbW9 | -112.01 | -1.21 | stop |
-| ema_crossover | solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3 | -98.84 | -1.05 | stop |
