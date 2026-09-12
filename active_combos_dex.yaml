@@ -1,67 +1,19 @@
-generated_ts: 1789176761016
+generated_ts: 1789194604499
 note: On-chain DEX paper-trading combos (simulated money). Short on-chain history
   means many will be skipped by the data checks - intended.
 combos:
 - strategy: donchian_breakout
-  symbol: solana:Q2sPHPdUWFMg7M7wwrQKLrn619cAucfRsmhVJffodSp
+  symbol: solana:2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2
   params: {}
-  token: USELESS
+  token: RAY
 - strategy: supertrend
-  symbol: solana:Q2sPHPdUWFMg7M7wwrQKLrn619cAucfRsmhVJffodSp
+  symbol: solana:2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2
   params: {}
-  token: USELESS
+  token: RAY
 - strategy: ema_crossover
-  symbol: solana:Q2sPHPdUWFMg7M7wwrQKLrn619cAucfRsmhVJffodSp
+  symbol: solana:2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2
   params: {}
-  token: USELESS
-- strategy: donchian_breakout
-  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
-  params: {}
-  token: fone
-- strategy: supertrend
-  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
-  params: {}
-  token: fone
-- strategy: ema_crossover
-  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
-  params: {}
-  token: fone
-- strategy: donchian_breakout
-  symbol: solana:nBXytBBfKLhj6teXarAv8rk6WNgUFBMyybUFRkuK7ad
-  params: {}
-  token: KNOTS
-- strategy: supertrend
-  symbol: solana:nBXytBBfKLhj6teXarAv8rk6WNgUFBMyybUFRkuK7ad
-  params: {}
-  token: KNOTS
-- strategy: ema_crossover
-  symbol: solana:nBXytBBfKLhj6teXarAv8rk6WNgUFBMyybUFRkuK7ad
-  params: {}
-  token: KNOTS
-- strategy: donchian_breakout
-  symbol: solana:BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1
-  params: {}
-  token: MET
-- strategy: supertrend
-  symbol: solana:BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1
-  params: {}
-  token: MET
-- strategy: ema_crossover
-  symbol: solana:BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1
-  params: {}
-  token: MET
-- strategy: donchian_breakout
-  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
-  params: {}
-  token: PENGU
-- strategy: supertrend
-  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
-  params: {}
-  token: PENGU
-- strategy: ema_crossover
-  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
-  params: {}
-  token: PENGU
+  token: RAY
 - strategy: donchian_breakout
   symbol: solana:zxTpi4BtaWX3mgdAPoezkMD1hxx8CdeCfrqXMWvSCLX
   params: {}
@@ -87,30 +39,6 @@ combos:
   params: {}
   token: RAYCAT
 - strategy: donchian_breakout
-  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
-  params: {}
-  token: CATE
-- strategy: supertrend
-  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
-  params: {}
-  token: CATE
-- strategy: ema_crossover
-  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
-  params: {}
-  token: CATE
-- strategy: donchian_breakout
-  symbol: solana:2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2
-  params: {}
-  token: RAY
-- strategy: supertrend
-  symbol: solana:2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2
-  params: {}
-  token: RAY
-- strategy: ema_crossover
-  symbol: solana:2AXXcN6oN9bBT5owwmTH53C7QHUXvhLeu718Kqt8rvY2
-  params: {}
-  token: RAY
-- strategy: donchian_breakout
   symbol: solana:6e7V9eegCHw997T72MxgwwJipZ6GJyZF8NvjkzT1rvpN
   params: {}
   token: ANSEM
@@ -123,29 +51,29 @@ combos:
   params: {}
   token: ANSEM
 - strategy: donchian_breakout
-  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
+  symbol: solana:nBXytBBfKLhj6teXarAv8rk6WNgUFBMyybUFRkuK7ad
   params: {}
-  token: ZCAT
+  token: KNOTS
 - strategy: supertrend
-  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
+  symbol: solana:nBXytBBfKLhj6teXarAv8rk6WNgUFBMyybUFRkuK7ad
   params: {}
-  token: ZCAT
+  token: KNOTS
 - strategy: ema_crossover
-  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
+  symbol: solana:nBXytBBfKLhj6teXarAv8rk6WNgUFBMyybUFRkuK7ad
   params: {}
-  token: ZCAT
+  token: KNOTS
 - strategy: donchian_breakout
-  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
+  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
   params: {}
-  token: PUMP
+  token: CATE
 - strategy: supertrend
-  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
+  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
   params: {}
-  token: PUMP
+  token: CATE
 - strategy: ema_crossover
-  symbol: solana:2uF4Xh61rDwxnG9woyxsVQP7zuA6kLFpb3NvnRQeoiSd
+  symbol: solana:HMzvsEEmtzHhvZNw9uwbaG85HCTmFnkbhzUx16cy7ca3
   params: {}
-  token: PUMP
+  token: CATE
 - strategy: donchian_breakout
   symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
   params: {}
@@ -159,29 +87,77 @@ combos:
   params: {}
   token: OTC
 - strategy: donchian_breakout
-  symbol: solana:2RmBs1KYzkDuaRR4F8zU9rPR6KT16eCgJ9YS1c8XXZgQ
+  symbol: solana:937nYYCPzqygDm71FX5XJzepDCnJLca9GSfe5essZK2H
   params: {}
-  token: BTC
+  token: Nasduck
 - strategy: supertrend
-  symbol: solana:2RmBs1KYzkDuaRR4F8zU9rPR6KT16eCgJ9YS1c8XXZgQ
+  symbol: solana:937nYYCPzqygDm71FX5XJzepDCnJLca9GSfe5essZK2H
   params: {}
-  token: BTC
+  token: Nasduck
 - strategy: ema_crossover
-  symbol: solana:2RmBs1KYzkDuaRR4F8zU9rPR6KT16eCgJ9YS1c8XXZgQ
+  symbol: solana:937nYYCPzqygDm71FX5XJzepDCnJLca9GSfe5essZK2H
   params: {}
-  token: BTC
+  token: Nasduck
 - strategy: donchian_breakout
-  symbol: solana:937nYYCPzqygDm71FX5XJzepDCnJLca9GSfe5essZK2H
+  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
   params: {}
-  token: Nasduck
+  token: ZCAT
 - strategy: supertrend
-  symbol: solana:937nYYCPzqygDm71FX5XJzepDCnJLca9GSfe5essZK2H
+  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
   params: {}
-  token: Nasduck
+  token: ZCAT
 - strategy: ema_crossover
-  symbol: solana:937nYYCPzqygDm71FX5XJzepDCnJLca9GSfe5essZK2H
+  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
   params: {}
-  token: Nasduck
+  token: ZCAT
+- strategy: donchian_breakout
+  symbol: solana:Q2sPHPdUWFMg7M7wwrQKLrn619cAucfRsmhVJffodSp
+  params: {}
+  token: USELESS
+- strategy: supertrend
+  symbol: solana:Q2sPHPdUWFMg7M7wwrQKLrn619cAucfRsmhVJffodSp
+  params: {}
+  token: USELESS
+- strategy: ema_crossover
+  symbol: solana:Q2sPHPdUWFMg7M7wwrQKLrn619cAucfRsmhVJffodSp
+  params: {}
+  token: USELESS
+- strategy: donchian_breakout
+  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
+  params: {}
+  token: fone
+- strategy: supertrend
+  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
+  params: {}
+  token: fone
+- strategy: ema_crossover
+  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
+  params: {}
+  token: fone
+- strategy: donchian_breakout
+  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
+  params: {}
+  token: PENGU
+- strategy: supertrend
+  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
+  params: {}
+  token: PENGU
+- strategy: ema_crossover
+  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
+  params: {}
+  token: PENGU
+- strategy: donchian_breakout
+  symbol: solana:BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1
+  params: {}
+  token: MET
+- strategy: supertrend
+  symbol: solana:BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1
+  params: {}
+  token: MET
+- strategy: ema_crossover
+  symbol: solana:BnztueWcXv93mgW7yJe8WYpnCxpz34nujPhfjQT6SLu1
+  params: {}
+  token: MET
 - strategy: donchian_breakout
   symbol: solana:4Ro3pG1XZgSJENfgCccNgQqrHYVqhHjwcL27oHmXMMTG
   params: {}
