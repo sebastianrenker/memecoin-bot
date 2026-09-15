@@ -1,4 +1,4 @@
-generated_ts: 1789467955320
+generated_ts: 1789485365339
 note: On-chain DEX paper-trading combos (simulated money). Short on-chain history
   means many will be skipped by the data checks - intended.
 combos:
@@ -27,17 +27,53 @@ combos:
   params: {}
   token: STONK
 - strategy: donchian_breakout
-  symbol: solana:FnzKY6x7entQ1eR3D225dQyT7ybfka4PskBMQhb8L3CC
+  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
   params: {}
-  token: ANSEM
+  token: fone
 - strategy: supertrend
-  symbol: solana:FnzKY6x7entQ1eR3D225dQyT7ybfka4PskBMQhb8L3CC
+  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
   params: {}
-  token: ANSEM
+  token: fone
 - strategy: ema_crossover
-  symbol: solana:FnzKY6x7entQ1eR3D225dQyT7ybfka4PskBMQhb8L3CC
+  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
   params: {}
-  token: ANSEM
+  token: fone
+- strategy: donchian_breakout
+  symbol: solana:41rzTMB7JHPTyMXzrYwdqnBecJRhkb8KHYAjrQ9cYxJx
+  params: {}
+  token: biketyson
+- strategy: supertrend
+  symbol: solana:41rzTMB7JHPTyMXzrYwdqnBecJRhkb8KHYAjrQ9cYxJx
+  params: {}
+  token: biketyson
+- strategy: ema_crossover
+  symbol: solana:41rzTMB7JHPTyMXzrYwdqnBecJRhkb8KHYAjrQ9cYxJx
+  params: {}
+  token: biketyson
+- strategy: donchian_breakout
+  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
+  params: {}
+  token: ZCAT
+- strategy: supertrend
+  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
+  params: {}
+  token: ZCAT
+- strategy: ema_crossover
+  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
+  params: {}
+  token: ZCAT
+- strategy: donchian_breakout
+  symbol: solana:HnhpJPJgBG2KwniMTNW8cVBHvk1hFog3RC3kjnyc23tD
+  params: {}
+  token: CARDS
+- strategy: supertrend
+  symbol: solana:HnhpJPJgBG2KwniMTNW8cVBHvk1hFog3RC3kjnyc23tD
+  params: {}
+  token: CARDS
+- strategy: ema_crossover
+  symbol: solana:HnhpJPJgBG2KwniMTNW8cVBHvk1hFog3RC3kjnyc23tD
+  params: {}
+  token: CARDS
 - strategy: donchian_breakout
   symbol: solana:6e4ewHhGZrBMiSkKat7QCx28dytJdnYrobNXWrPL5WFN
   params: {}
@@ -51,29 +87,17 @@ combos:
   params: {}
   token: EMBER
 - strategy: donchian_breakout
-  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
+  symbol: solana:FnzKY6x7entQ1eR3D225dQyT7ybfka4PskBMQhb8L3CC
   params: {}
-  token: OTC
+  token: ANSEM
 - strategy: supertrend
-  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
+  symbol: solana:FnzKY6x7entQ1eR3D225dQyT7ybfka4PskBMQhb8L3CC
   params: {}
-  token: OTC
+  token: ANSEM
 - strategy: ema_crossover
-  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
+  symbol: solana:FnzKY6x7entQ1eR3D225dQyT7ybfka4PskBMQhb8L3CC
   params: {}
-  token: OTC
-- strategy: donchian_breakout
-  symbol: solana:41rzTMB7JHPTyMXzrYwdqnBecJRhkb8KHYAjrQ9cYxJx
-  params: {}
-  token: biketyson
-- strategy: supertrend
-  symbol: solana:41rzTMB7JHPTyMXzrYwdqnBecJRhkb8KHYAjrQ9cYxJx
-  params: {}
-  token: biketyson
-- strategy: ema_crossover
-  symbol: solana:41rzTMB7JHPTyMXzrYwdqnBecJRhkb8KHYAjrQ9cYxJx
-  params: {}
-  token: biketyson
+  token: ANSEM
 - strategy: donchian_breakout
   symbol: solana:Q2sPHPdUWFMg7M7wwrQKLrn619cAucfRsmhVJffodSp
   params: {}
@@ -99,41 +123,17 @@ combos:
   params: {}
   token: PUMP
 - strategy: donchian_breakout
-  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
+  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
   params: {}
-  token: ZCAT
+  token: OTC
 - strategy: supertrend
-  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
+  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
   params: {}
-  token: ZCAT
+  token: OTC
 - strategy: ema_crossover
-  symbol: solana:GuPbekwP9MqB23CghhiMQZTaigPdUJooovo1neCErhM8
+  symbol: solana:DA4pM4xSDY4M9V4CgAKKBVH1pw1yscTQQa5nEkGHuKpt
   params: {}
-  token: ZCAT
-- strategy: donchian_breakout
-  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
-  params: {}
-  token: fone
-- strategy: supertrend
-  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
-  params: {}
-  token: fone
-- strategy: ema_crossover
-  symbol: solana:3dcwhqJp6JBTJPq8ga335HWgSQVS7uQmdmeX7iGjMNpj
-  params: {}
-  token: fone
-- strategy: donchian_breakout
-  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
-  params: {}
-  token: PENGU
-- strategy: supertrend
-  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
-  params: {}
-  token: PENGU
-- strategy: ema_crossover
-  symbol: solana:D4J77RpC5k8Nkh6h8bUw2CJBJrykSRqMuNz49f2Fbx3a
-  params: {}
-  token: PENGU
+  token: OTC
 - strategy: donchian_breakout
   symbol: solana:937nYYCPzqygDm71FX5XJzepDCnJLca9GSfe5essZK2H
   params: {}
@@ -147,29 +147,17 @@ combos:
   params: {}
   token: Nasduck
 - strategy: donchian_breakout
-  symbol: solana:AFaYrFH7hUYnkv5mbvbnRHwX29M9JzUL3ySGtQz69AUv
+  symbol: solana:84uf4YpzybB4vm8RsermBFqjGxThAETpyMbp5HvkVRJQ
   params: {}
-  token: LMAO!
+  token: PERPSPAD
 - strategy: supertrend
-  symbol: solana:AFaYrFH7hUYnkv5mbvbnRHwX29M9JzUL3ySGtQz69AUv
+  symbol: solana:84uf4YpzybB4vm8RsermBFqjGxThAETpyMbp5HvkVRJQ
   params: {}
-  token: LMAO!
+  token: PERPSPAD
 - strategy: ema_crossover
-  symbol: solana:AFaYrFH7hUYnkv5mbvbnRHwX29M9JzUL3ySGtQz69AUv
+  symbol: solana:84uf4YpzybB4vm8RsermBFqjGxThAETpyMbp5HvkVRJQ
   params: {}
-  token: LMAO!
-- strategy: donchian_breakout
-  symbol: solana:HnhpJPJgBG2KwniMTNW8cVBHvk1hFog3RC3kjnyc23tD
-  params: {}
-  token: CARDS
-- strategy: supertrend
-  symbol: solana:HnhpJPJgBG2KwniMTNW8cVBHvk1hFog3RC3kjnyc23tD
-  params: {}
-  token: CARDS
-- strategy: ema_crossover
-  symbol: solana:HnhpJPJgBG2KwniMTNW8cVBHvk1hFog3RC3kjnyc23tD
-  params: {}
-  token: CARDS
+  token: PERPSPAD
 - strategy: donchian_breakout
   symbol: solana:Cb7ZRgPLhji3Th7htXyKEqbXvNjPpeTvckXuWakBUhXu
   params: {}
@@ -194,15 +182,3 @@ combos:
   symbol: solana:Bd4wKg3xEBKJ4Xrw8skXMmJ4W65gk3x8yd7AovuBJisZ
   params: {}
   token: PEPENOM
-- strategy: donchian_breakout
-  symbol: solana:84uf4YpzybB4vm8RsermBFqjGxThAETpyMbp5HvkVRJQ
-  params: {}
-  token: PERPSPAD
-- strategy: supertrend
-  symbol: solana:84uf4YpzybB4vm8RsermBFqjGxThAETpyMbp5HvkVRJQ
-  params: {}
-  token: PERPSPAD
-- strategy: ema_crossover
-  symbol: solana:84uf4YpzybB4vm8RsermBFqjGxThAETpyMbp5HvkVRJQ
-  params: {}
-  token: PERPSPAD
